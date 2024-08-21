@@ -1,10 +1,52 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>Grupo 6 - HTML/Javascript/Bulma</title>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+        <script src="app.js" defer></script>
     </head>
     <body>
+        <h1 id="mainPageTitle">Gestor De Tareas - Grupo 6</h1>
+        <button id="bttAddTask">Agregar Tarea</button>
+        
+        <div class="columns is-desktop">
+            <div class="column columns__backlog">
+                <h2>Backlog</h2>
+            </div>
+            <div class="column columns__to-do">
+                <h2>To do</h2>
+            </div>
+            <div class="column columns__in-progress">
+                <h2>In progress</h2>
+            </div>
+            <div class="column columns__blocked">
+                <h2>Blocked</h2>
+            </div>
+            <div class="column columns__done">
+                <h2>Done</h2>
+            </div>
+        </div>
+
+        <div class="modal" id="newTask">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+              <!-- Any other Bulma elements you want -->
+            </div>
+            <div>
+                <button class="modal-close is-large" aria-label="close">Cancelar</button>
+                <button class="modal-close is-large" aria-label="close">Aceptar</button>
+            </div>
+            
+        </div>
+
+        <div class="modal" id="editTask">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+              <!-- Any other Bulma elements you want -->
+            </div>
+            <button class="modal-close is-large" aria-label="close"></button>
+        </div>
         
     </body>
 </html>
