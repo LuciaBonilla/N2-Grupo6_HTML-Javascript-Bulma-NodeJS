@@ -4,9 +4,10 @@
 <head>
     <title>Grupo 6 - HTML/Javascript/Bulma</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="bulma\css\bulma.css">
+    <link rel="stylesheet" href="bulma/css/bulma.min.css">
+    <link rel="stylesheet" href="icons/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 
     <script src="app.js" defer></script>
@@ -14,55 +15,311 @@
 
 <body>
 
-    <!-- Título -->
-    <h1 id="mainPageTitle" class="my-element">Gestor De Tareas - Grupo 6</h1>
+    <div style="display: none;">
 
-    <!-- Botón para agregar tarea -->
-    <button id="bttAddTask">Agregar Tarea</button>
+        <!-- Título -->
+        <h1 id="mainPageTitle" class="my-element">Gestor De Tareas</h1>
 
-    <div class="columns is-multiline is-desktop">
+        <h2>Grupo 6</h2>
 
-        <div class="column columns__backlog is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
-            <h2>Backlog</h2>
+        <!-- Botón para agregar tarea -->
+        <button id="bttAddTask" class="button is-danger is-small">Agregar Tarea</button>
+
+        <div class="columns is-multiline is-desktop">
+
+            <div class="column columns__backlog is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
+                <h2>Backlog</h2>
+            </div>
+
+            <div class="column columns__to-do is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
+                <h2>To do</h2>
+            </div>
+
+            <div class="column columns__in-progress is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
+                <h2>In progress</h2>
+            </div>
+
+            <div class="column columns__blocked is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
+                <h2>Blocked</h2>
+            </div>
+
+            <div class="column columns__done is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
+                <h2>Done</h2>
+            </div>
         </div>
 
-        <div class="column columns__to-do is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
-            <h2>To do</h2>
+        <div class="modal" id="newTask">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <!-- Any other Bulma elements you want -->
+            </div>
+
+            <div>
+                <button class="modal-close is-large" aria-label="close">Cancelar</button>
+                <button class="modal-close is-large" aria-label="close">Aceptar</button>
+            </div>
         </div>
 
-        <div class="column columns__in-progress is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
-            <h2>In progress</h2>
-        </div>
-
-        <div class="column columns__blocked is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
-            <h2>Blocked</h2>
-        </div>
-
-        <div class="column columns__done is-one-mobile is-one-fifth-tablet is-one-fifth-desktop">
-            <h2>Done</h2>
+        <div class="modal" id="editTask">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <!-- Any other Bulma elements you want -->
+            </div>
+            <button class="modal-close is-large" aria-label="close"></button>
         </div>
     </div>
 
-    <div class="modal" id="newTask">
-        <div class="modal-background"></div>
-        <div class="modal-content">
-            <!-- Any other Bulma elements you want -->
-        </div>
+    <!-- Elementos para mobile. -->
+    <div class="mobile-container theme-light">
 
-        <div>
-            <button class="modal-close is-large" aria-label="close">Cancelar</button>
-            <button class="modal-close is-large" aria-label="close">Aceptar</button>
-        </div>
+        <!-- Encabezado -->
+        <header class="header">
+            <!-- Título -->
+            <h1 class="header__title">
+                <i class="fa-solid fa-clipboard-list"></i>
+                GESTOR DE TAREAS
+            </h1>
+
+            <!-- Número de grupo -->
+            <h2 class="header__group-name">GRUPO 6 - N2</h2>
+
+            <!-- Botón de agregar tarea -->
+            <button class="header__add-task-button">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </header>
+
+        <!-- Parte de las columnas -->
+        <main class="main">
+            <section class="main__column main__column--backlog">
+                <h3 class="main__column-title">
+                    BACKLOG
+                    <i class="fa-solid fa-database"></i>
+                </h3>
+
+                <article class="main__card">
+                    <h4 class="main__card-title">Tarea111</h4>
+                    <p class="main__card-description">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                        Lorem ipsum dolor sit
+                        amet consectetur adipisicing elit. Ab, dignissimos adipisci? Consequatur illum consectetur quo,
+                        atque minima voluptate ducimus natus facilis blanditiis, sunt exercitationem reprehenderit amet
+                        accusantium, at harum. Necessitatibus!
+                    </p>
+                    <p class="main__card-assigned">
+                        <i class="fa-solid fa-user"></i>
+                        Amelia
+                    </p>
+                    <p class="main__card-priority">
+                        <i class="fa-regular fa-star-half-stroke"></i>
+                        Alta
+                    </p>
+                    <p class="main__card-limit-date">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        20/10/2004
+                    </p>
+                </article>
+            </section>
+
+            <section class="main__column main__column--to-do">
+                <h3 class="main__column-title">
+                    TO DO
+                    <i class="fa-solid fa-list"></i>
+                </h3>
+
+            </section>
+
+            <section class="main__column main__column--in-progress">
+                <h3 class="main__column-title">
+                    IN PROGRESS
+                    <i class="fa-solid fa-spinner"></i>
+                </h3>
+
+            </section>
+
+            <section class="main__column main__column--blocked">
+                <h3 class="main__column-title">
+                    BLOCKED
+                    <i class="fa-solid fa-lock"></i>
+                </h3>
+
+            </section>
+
+            <section class="main__column main__column--done">
+                <h3 class="main__column-title">
+                    DONE
+                    <i class="fa-solid fa-square-check"></i>
+                </h3>
+            </section>
+        </main>
+
+        <aside class="change-task-modal">
+            <h3 class="change-task-modal__title">
+                <i class="fa-solid fa-user-pen"></i>
+                EDITAR TAREA
+            </h3>
+
+            <form class="change-task-modal__form">
+
+                <div class="field">
+                    <label class="label">Título</label>
+                    <div class="control">
+                        <input class="input is-small" type="text" placeholder="TÍTULO">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Descripción</label>
+                    <div class="control">
+                        <input class="input is-small" type="text" placeholder="DESCRIPCIÓN">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Asignado</label>
+                    <div class="control">
+                        <div class="select is-rounded is-small">
+                            <select>
+                                <option>Amelia</option>
+                                <option>Marco</option>
+                                <option>Polo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Prioridad</label>
+                    <div class="control">
+                        <div class="select is-rounded is-small">
+                            <select>
+                                <option>Alta</option>
+                                <option>Media</option>
+                                <option>Baja</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Estado</label>
+                    <div class="control">
+                        <div class="select is-rounded is-small">
+                            <select>
+                                <option>Backlog</option>
+                                <option>To Do</option>
+                                <option>In Progress</option>
+                                <option>Blocked</option>
+                                <option>Done</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Fecha límite</label>
+                    <div class="control">
+                        <input class="input is-small" type="date" placeholder="FECHA LÍMITE">
+                    </div>
+                </div>
+
+                <button class="button is-danger is-normal">
+                    <i class="fa-solid fa-circle-xmark mr-2"></i>
+                    ELIMINAR
+                </button>
+                <button class="button is-warning is-normal">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                    CANCELAR
+                </button>
+                <button class="button is-success is-normal">
+                    <i class="fa-solid fa-circle-check mr-2"></i>
+                    ACEPTAR
+                </button>
+            </form>
+        </aside>
     </div>
 
-    <div class="modal" id="editTask">
-        <div class="modal-background"></div>
-        <div class="modal-content">
-            <!-- Any other Bulma elements you want -->
-        </div>
-        <button class="modal-close is-large" aria-label="close"></button>
-    </div>
+    <aside class="create-task-modal">
+        <h3 class="create-task-modal__title">
+            <i class="fa-solid fa-user-pen"></i>
+            EDITAR TAREA
+        </h3>
 
+        <form class="create-task-modal__form">
+
+            <div class="field">
+                <label class="label">Título</label>
+                <div class="control">
+                    <input class="input is-small" type="text" placeholder="TÍTULO">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Descripción</label>
+                <div class="control">
+                    <input class="input is-small" type="text" placeholder="DESCRIPCIÓN">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Asignado</label>
+                <div class="control">
+                    <div class="select is-rounded is-small">
+                        <select>
+                            <option>Amelia</option>
+                            <option>Marco</option>
+                            <option>Polo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Prioridad</label>
+                <div class="control">
+                    <div class="select is-rounded is-small">
+                        <select>
+                            <option>Alta</option>
+                            <option>Media</option>
+                            <option>Baja</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Estado</label>
+                <div class="control">
+                    <div class="select is-rounded is-small">
+                        <select>
+                            <option>Backlog</option>
+                            <option>To Do</option>
+                            <option>In Progress</option>
+                            <option>Blocked</option>
+                            <option>Done</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Fecha límite</label>
+                <div class="control">
+                    <input class="input is-small" type="date" placeholder="FECHA LÍMITE">
+                </div>
+            </div>
+
+            <button class="button is-warning is-normal">
+                <i class="fa-solid fa-arrow-left mr-2"></i>
+                CANCELAR
+            </button>
+            <button class="button is-success is-normal">
+                <i class="fa-solid fa-circle-check mr-2"></i>
+                ACEPTAR
+            </button>
+        </form>
+    </aside>
+</div>
 </body>
 
 </html>
