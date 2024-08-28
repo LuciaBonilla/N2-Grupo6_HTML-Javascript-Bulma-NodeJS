@@ -13,81 +13,87 @@
     <script src="app.js" defer></script>
 </head>
 
+<!-- Maquetación con metodología BEM (Block__Element--Modifier). -->
+
 <body>
     <!-- Encabezado. -->
     <header class="header">
-        <!-- Título -->
+        <!-- Título. -->
         <h1 class="header__title">
             <i class="fa-solid fa-clipboard-list"></i>
             GESTOR DE TAREAS
         </h1>
 
-        <!-- Número de grupo -->
+        <!-- Número de grupo. -->
         <h2 class="header__group-name">GRUPO 6 - N2</h2>
 
-        <!-- Botón de agregar tarea -->
+        <!-- Botón de agregar tarea. -->
         <button class="header__add-task-button">
             <i class="fa-solid fa-plus"></i>
+            <p class="header__add-task-button--text">
+                AÑADIR TAREA
+            </p>
         </button>
     </header>
 
-    <!-- Columnas y sus cartas. -->
+    <!-- Main. -->
     <main class="main">
-        <!-- Backlog. -->
-        <section class="main__column main__column--backlog">
-            <h3 class="main__column-title">
+        <!-- Columna Backlog. -->
+        <section class="task-column task-column--backlog">
+            <h3 class="task-column__title">
                 BACKLOG
                 <i class="fa-solid fa-database"></i>
             </h3>
 
-            <div id="backlog-container"></div>
+            <div class="task-column__container task-column__container--backlog"></div>
         </section>
 
-        <!-- To do. -->
-        <section class="main__column main__column--to-do">
-            <h3 class="main__column-title">
+        <!-- Columna To do. -->
+        <section class="task-column task-column--to-do">
+            <h3 class="task-column__title">
                 TO DO
                 <i class="fa-solid fa-list"></i>
             </h3>
 
-            <div id="to-do-container"></div>
+            <div class="task-column__container task-column__container--to-do"></div>
         </section>
 
-        <!-- In progress. -->
-        <section class="main__column main__column--in-progress">
-            <h3 class="main__column-title">
+        <!-- Columna In progress. -->
+        <section class="task-column task-column--in-progress">
+            <h3 class="task-column__title">
                 IN PROGRESS
                 <i class="fa-solid fa-spinner"></i>
             </h3>
 
-            <div id="in-progress-container"></div>
+            <div class="task-column__container task-column__container--in-progress"></div>
         </section>
 
-        <!-- Blocked. -->
-        <section class="main__column main__column--blocked">
-            <h3 class="main__column-title">
+        <!-- Columna Blocked. -->
+        <section class="task-column task-column--blocked">
+            <h3 class="task-column__title">
                 BLOCKED
                 <i class="fa-solid fa-lock"></i>
             </h3>
 
-            <div id="blocked-container"></div>
+            <div class="task-column__container task-column__container--blocked"></div>
         </section>
 
-        <!-- Done. -->
-        <section class="main__column main__column--done">
-            <h3 class="main__column-title">
+        <!-- Columna Done. -->
+        <section class="task-column task-column--done">
+            <h3 class="task-column__title">
                 DONE
                 <i class="fa-solid fa-square-check"></i>
             </h3>
 
-            <div id="done-container"></div>
+            <div class="task-column__container task-column__container--done"></div>
         </section>
     </main>
 
     <!-- Modal Editar tarea y Agregar tarea.
-    Hay dos modos: Editar y Agregar
-    Algunas cosas se ocultarán en un modo o en otro. -->
-    <aside class="task-modal">
+
+    Hay dos modos: Editar tarea y Agregar tarea.
+    Algunas cosas se ocultarán en un modo u en otro. -->
+    <aside class="task-modal hidden">
         <!-- Títulos. -->
         <h3 class="task-modal__title task-modal__title--change-task">
             <i class="fa-solid fa-user-pen"></i>
@@ -100,18 +106,21 @@
         </h3>
 
         <!-- Formulario. -->
-        <form class="task-modal__form">
-            <div class="task-modal__input-form">
+        <form class="task-form">
+            <!-- Título. -->
+            <div class="task-form__input">
                 <label>Título</label>
                 <input id="title" type="text" placeholder="TÍTULO">
             </div>
 
-            <div class="task-modal__input-form">
+            <!-- Descripción. -->
+            <div class="task-form__input">
                 <label>Descripción</label>
                 <input id="description" type="text" placeholder="DESCRIPCIÓN">
             </div>
 
-            <div class="task-modal__input-form">
+            <!-- Asignado. -->
+            <div class="task-form__input">
                 <label>Asignado</label>
                 <select id="assigned">
                     <option>Amelia</option>
@@ -120,7 +129,8 @@
                 </select>
             </div>
 
-            <div class="task-modal__input-form">
+            <!-- Prioridad. -->
+            <div class="task-form__input">
                 <label>Prioridad</label>
                 <select id="priority">
                     <option>Alta</option>
@@ -129,7 +139,8 @@
                 </select>
             </div>
 
-            <div class="task-modal__input-form">
+            <!-- Estado. -->
+            <div class="task-form__input">
                 <label>Estado</label>
                 <select id="state">
                     <option>Backlog</option>
@@ -140,20 +151,37 @@
                 </select>
             </div>
 
-            <div class="task-modal__input-form">
+            <!-- Fecha límite. -->
+            <div class="task-form__input">
                 <label>Fecha límite</label>
                 <input id="limit-date" type="date" placeholder="FECHA LÍMITE">
             </div>
 
-            <button class="task-modal__button-form task-modal__button-form--delete">
-                <i class="fa-solid fa-circle-xmark"></i>
-                ELIMINAR
-            </button>
-            <button class="task-modal__button-form task-modal__button-form--cancel">
+            <!-- Botones. -->
+
+            <!-- Para agregar tarea. -->
+            <button class="task-form__button task-form__button--cancel task-form__button--cancel-add-task">
                 <i class="fa-solid fa-arrow-left"></i>
                 CANCELAR
             </button>
-            <button class="task-modal__button-form task-modal__button-form--accept">
+
+            <button class="task-form__button task-form__button--accept task-form__button--accept-add-task">
+                <i class="fa-solid fa-circle-check"></i>
+                ACEPTAR
+            </button>
+
+            <!-- Para editar tarea. -->
+            <button class="task-form__button task-form__button--delete task-form__button--delete-change-task">
+                <i class="fa-solid fa-circle-xmark"></i>
+                ELIMINAR
+            </button>
+
+            <button class="task-form__button task-form__button--cancel task-form__button--cancel-change-task">
+                <i class="fa-solid fa-arrow-left"></i>
+                CANCELAR
+            </button>
+
+            <button class="task-form__button task-form__button--accept task-form__button--accept-change-task">
                 <i class="fa-solid fa-circle-check"></i>
                 ACEPTAR
             </button>
