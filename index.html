@@ -8,7 +8,9 @@
 
     <link rel="stylesheet" href="bulma/css/bulma.min.css">
     <link rel="stylesheet" href="icons/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/special-rules.css">
+    <link rel="stylesheet" href="styles/dark-mode.css">
 
     <script src="app.js" defer></script>
 </head>
@@ -34,6 +36,11 @@
                 AÑADIR TAREA
             </p>
         </button>
+
+        <!-- Botón Cambio de modo (light/dark). -->
+        <button class="header__switch-mode-button button is-rounded">
+            <i class="fa-solid fa-sun"></i>
+        </button>
     </header>
 
     <!-- Main. -->
@@ -46,6 +53,10 @@
             </h3>
 
             <div class="task-column__container task-column__container--backlog"></div>
+
+            <button class="task-column__expand-button button is-rounded is-warning">
+                <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
         </section>
 
         <!-- Columna To do. -->
@@ -56,6 +67,10 @@
             </h3>
 
             <div class="task-column__container task-column__container--to-do"></div>
+
+            <button class="task-column__expand-button button is-rounded is-warning">
+                <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
         </section>
 
         <!-- Columna In progress. -->
@@ -66,6 +81,10 @@
             </h3>
 
             <div class="task-column__container task-column__container--in-progress"></div>
+
+            <button class="task-column__expand-button button is-rounded is-warning">
+                <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
         </section>
 
         <!-- Columna Blocked. -->
@@ -76,6 +95,10 @@
             </h3>
 
             <div class="task-column__container task-column__container--blocked"></div>
+
+            <button class="task-column__expand-button button is-rounded is-warning">
+                <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
         </section>
 
         <!-- Columna Done. -->
@@ -86,6 +109,10 @@
             </h3>
 
             <div class="task-column__container task-column__container--done"></div>
+
+            <button class="task-column__expand-button button is-rounded is-warning">
+                <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
         </section>
     </main>
 
@@ -93,7 +120,7 @@
 
     Hay dos modos: Editar tarea y Agregar tarea.
     Algunas cosas se ocultarán en un modo u en otro. -->
-    <aside class="task-modal hidden">
+    <aside class="task-modal down">
         <!-- Títulos. -->
         <h3 class="task-modal__title task-modal__title--change-task">
             <i class="fa-solid fa-user-pen"></i>

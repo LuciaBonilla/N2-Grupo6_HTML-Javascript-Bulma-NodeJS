@@ -6,6 +6,11 @@
 const HTML_HEADER = document.getElementsByClassName("header")[0];
 const HTML_BUTTON_ADD_TASK = document.getElementsByClassName("header__add-task-button")[0];
 
+// -> Para el modo oscuro.
+const HTML_SWITCH_MODE_BUTTON = document.getElementsByClassName("header__switch-mode-button")[0];
+const HTML_EMOJI_MODE = document.getElementsByClassName("fa-solid fa-sun")[0];
+
+// -> Main.
 const HTML_MAIN = document.getElementsByClassName("main")[0];
 
 // -> Contenedores para las tareas en cada columna.
@@ -14,6 +19,9 @@ const HTML_CONTAINER_TO_DO = document.getElementsByClassName("task-column__conta
 const HTML_CONTAINER_IN_PROGRESS = document.getElementsByClassName("task-column__container--in-progress")[0];
 const HTML_CONTAINER_BLOCKED = document.getElementsByClassName("task-column__container--blocked")[0];
 const HTML_CONTAINER_DONE = document.getElementsByClassName("task-column__container--done")[0];
+
+// Botones para expandir columnas (sólo para Mobile).
+const HTML_EXPAND_COLUMN_BUTTONS = document.getElementsByClassName("task-column__expand-button");
 
 // -> Modal.
 const HTML_TASK_MODAL = document.getElementsByClassName("task-modal")[0];
@@ -153,6 +161,7 @@ class Task {
         this.#HTMLCard.id = `${this.#state}-${this.#id}`;
 
         this.#HTMLTitle.innerHTML = this.#title;
+        this.#HTMLTitle.classList.add("task-card__title");
 
         this.#HTMLDescription.innerHTML = `
             <i class="fa-regular fa-pen-to-square"></i>
@@ -354,12 +363,8 @@ class TaskManager {
 
 // Muestra el modal en modo Agregar tarea.
 function showAddTaskModal() {
-    // Oculta la pantalla principal.
-    HTML_HEADER.classList.add("hidden");
-    HTML_MAIN.classList.add("hidden");
-
-    // Muestra el modal en modo Agregar tarea.
-    HTML_TASK_MODAL.classList.remove("hidden");
+    HTML_TASK_MODAL.classList.remove("down");
+    HTML_TASK_MODAL.classList.add("over");
 
     // Muestra el título correspondiente.
     HTML_TASK_MODAL_ADD_TASK_TITLE.classList.remove("hidden");
@@ -375,12 +380,8 @@ function showAddTaskModal() {
 
 // Muestra el modal en modo Editar tarea.
 function showChangeTaskModal() {
-    // Oculta la pantalla principal.
-    HTML_HEADER.classList.add("hidden");
-    HTML_MAIN.classList.add("hidden");
-
-    // Muestra el modal en modo Editar tarea.
-    HTML_TASK_MODAL.classList.remove("hidden");
+    HTML_TASK_MODAL.classList.remove("down");
+    HTML_TASK_MODAL.classList.add("over");
 
     // Muestra el título correspondiente.
     HTML_TASK_MODAL_ADD_TASK_TITLE.classList.add("hidden");
@@ -405,9 +406,8 @@ function showChangeTaskModal() {
 // Muestra la pantalla principal.
 function showPrincipalPage() {
     // Muestra la página principal y oculta el modal.
-    HTML_HEADER.classList.remove("hidden");
-    HTML_MAIN.classList.remove("hidden");
-    HTML_TASK_MODAL.classList.add("hidden");
+    HTML_TASK_MODAL.classList.remove("over");
+    HTML_TASK_MODAL.classList.add("down");
 }
 
 // Limpia los inputs.
@@ -418,11 +418,34 @@ function cleanInputs() {
     });
 }
 
+function changeMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (HTML_EMOJI_MODE.classList.contains("fa-sun")) {
+        HTML_EMOJI_MODE.classList.remove("fa-sun");
+        HTML_EMOJI_MODE.classList.add("fa-moon"); // Cambiar al icono de luna (modo oscuro)
+    } else {
+        HTML_EMOJI_MODE.classList.remove("fa-moon");
+        HTML_EMOJI_MODE.classList.add("fa-sun"); // Cambiar al icono de sol (modo claro)
+    }
+}
+
 // *** PÁGINA PRINCIPAL
 // -> Botón AGREGAR TAREA en la página principal.
 HTML_BUTTON_ADD_TASK.addEventListener("click", function () {
     showAddTaskModal();
 });
+
+// -> Modo oscuro.
+HTML_SWITCH_MODE_BUTTON.addEventListener("click", function () {
+    changeMode();
+});
+
+// -> Botones para expandir columnas (sólo para Mobile).
+Array.from(HTML_EXPAND_COLUMN_BUTTONS).forEach(button => button.addEventListener("click", function () {
+    const siblingContainerTasks = button.previousElementSibling;
+    siblingContainerTasks.classList.toggle("occupyAllHeight");
+}));
 
 // *** MODAL AGREGAR TAREA
 // -> Botón ACEPTAR en modo Agregar tarea.
@@ -473,3 +496,4 @@ HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK.addEventListener("click", function (ev
     showPrincipalPage();
     cleanInputs();
 });
+

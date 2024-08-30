@@ -1,0 +1,26 @@
+/* Reglas especiales */
+.over {
+    z-index: 1000;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.down {
+    z-index: -1000;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+.occupyAllHeight {
+    height: 100%;
+}
