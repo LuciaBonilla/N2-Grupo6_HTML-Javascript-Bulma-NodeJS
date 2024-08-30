@@ -1,4 +1,4 @@
-// *** VARIABLES GLOBALES ***
+// #region *** VARIABLES GLOBALES ***
 
 // *** ELEMENTOS DEL HTML
 
@@ -49,14 +49,14 @@ const HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK = document.getElementsByClassNam
 const HTML_CHANGE_TASK_MODAL_BUTTON_CANCEL_TASK = document.getElementsByClassName("task-form__button--cancel-change-task")[0];
 const HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK = document.getElementsByClassName("task-form__button--accept-change-task")[0];
 
-//------------------------------------------------------------------------------------------------------------------------
+// #endregion
 
-// ***CLASES***
+// #region *** CLASES ***
 
-// ***Clase Task
+// *** Clase Task
 // Función: Guarda la info y la tarjeta HTML de la tarea.
 class Task {
-    static #ID = 0;
+    static #ID = 1;
 
     // Info de la tarea.
     #id;
@@ -75,15 +75,19 @@ class Task {
     #HTMLPriority;
     #HTMLLimitDate;
 
-    constructor() {
-        // Inicialización de la info; la toma de los inputs del modal.
-        this.#id = ++Task.#ID;
-        this.#title = HTML_TASK_MODAL_INPUT_TITLE.value;
-        this.#description = HTML_TASK_MODAL_INPUT_DESCRIPTION.value;
-        this.#assigned = HTML_TASK_MODAL_INPUT_ASSIGNED.value;
-        this.#priority = HTML_TASK_MODAL_INPUT_PRIORITY.value;
-        this.#limitDate = HTML_TASK_MODAL_INPUT_LIMIT_DATE.value;
-        this.#state = HTML_TASK_MODAL_INPUT_STATE.value;
+    constructor(id, title, description, assigned, priority, limitDate, state) {
+        if (id <= Task.#ID) {
+            ++Task.#ID;
+            id = Task.#ID;
+        }
+        this.#id = id;
+        // Inicialización de la info.
+        this.#title = title;
+        this.#description = description;
+        this.#assigned = assigned;
+        this.#priority = priority;
+        this.#limitDate = limitDate;
+        this.#state = state;
 
         // Inicialización de la tarjeta.
         this.#HTMLCard = document.createElement("article");
@@ -105,11 +109,19 @@ class Task {
         this.#updateHTMLCard();
 
         const task = this;
-        // Se le asigna un event listener.
+        // Se le asigna un event listener a la tarjeta.
         this.#HTMLCard.addEventListener("click", function () {
             TaskManager.changeTaskToEdit(task);
             showChangeTaskModal();
         });
+    }
+
+    static set ID(id){
+        Task.#ID = id;
+    }
+
+    static get ID() {
+        return Task.#ID;
     }
 
     get id() {
@@ -145,13 +157,13 @@ class Task {
     }
 
     // Actualiza los atributos de la tarea y la tarjeta HTML.
-    updateTask() {
-        this.#title = HTML_TASK_MODAL_INPUT_TITLE.value;
-        this.#description = HTML_TASK_MODAL_INPUT_DESCRIPTION.value;
-        this.#assigned = HTML_TASK_MODAL_INPUT_ASSIGNED.value;
-        this.#priority = HTML_TASK_MODAL_INPUT_PRIORITY.value;
-        this.#limitDate = HTML_TASK_MODAL_INPUT_LIMIT_DATE.value;
-        this.#state = HTML_TASK_MODAL_INPUT_STATE.value;
+    updateTask(title, description, assigned, priority, limitDate, state) {
+        this.#title = title;
+        this.#description = description;
+        this.#assigned = assigned;
+        this.#priority = priority;
+        this.#limitDate = limitDate;
+        this.#state = state;
 
         this.#updateHTMLCard();
     }
@@ -185,6 +197,8 @@ class Task {
     }
 };
 
+// *** Clase TaskManager
+// Función: Guarda las tarea y las administra; las crea, destruye y actualiza.
 class TaskManager {
     // Tarea que se está editando.
     static #TASK_TO_EDIT;
@@ -203,6 +217,26 @@ class TaskManager {
         return this.#TASK_TO_EDIT;
     }
 
+    static get BACKLOG() {
+        return this.#BACKLOG;
+    }
+
+    static get TO_DO() {
+        return this.#TO_DO;
+    }
+
+    static get IN_PROGRESS() {
+        return this.#IN_PROGRESS;
+    }
+
+    static get BLOCKED() {
+        return this.#BLOCKED;
+    }
+
+    static get DONE() {
+        return this.#DONE;
+    }
+
     // Cambia la tarea a editar actual por otra.
     static changeTaskToEdit(task) {
         this.#TASK_TO_EDIT = task;
@@ -210,8 +244,8 @@ class TaskManager {
     }
 
     // Añande la tarea a backend y a frontend.
-    static addTask() {
-        const newTask = new Task();
+    static addTask(id, title, description, assigned, priority, limitDate, state) {
+        const newTask = new Task(id, title, description, assigned, priority, limitDate, state);
         const newTaskState = newTask.state;
         let container;
         let list;
@@ -240,6 +274,9 @@ class TaskManager {
         }
         list.push(newTask);
         container.appendChild(newTask.HTMLCard);
+
+        LocalStorageManager.saveIdOfTaskClassToStorage();
+        LocalStorageManager.saveTaskListsToStorage();
     };
 
     // Elimina la tarea a editar de backend y de frontend.
@@ -280,12 +317,16 @@ class TaskManager {
         });
         this.#TASK_TO_EDIT = null;
         this.#TASK_TO_EDIT_STATE = null;
+
+        LocalStorageManager.saveTaskListsToStorage();
     };
 
-    // Edita la tarea 
-    static editTaskToEdit() {
-        this.#TASK_TO_EDIT.updateTask();
+    // Edita la tarea .
+    static editTaskToEdit(title, description, assigned, priority, limitDate, state) {
+        this.#TASK_TO_EDIT.updateTask(title, description, assigned, priority, limitDate, state);
         this.#moveTaskToEdit();
+
+        LocalStorageManager.saveTaskListsToStorage();
     };
 
     // Mueve la tarea de contenedor si corresponde.
@@ -348,6 +389,7 @@ class TaskManager {
             oldList.forEach((task, index) => {
                 if (task.id === taskToMoveId) {
                     oldList.splice(index, 1);
+                    return;
                 }
             });
             newList.push(this.#TASK_TO_EDIT);
@@ -358,8 +400,75 @@ class TaskManager {
     }
 }
 
-//------------------------------------------------------------------------------------------------------------------------
-// *** EVENTOS ***
+// *** Clase LocalStorageManager
+
+class LocalStorageManager {
+    static saveTaskListsToStorage() {
+        localStorage.setItem("TASKS_BACKLOG", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.BACKLOG)));
+        localStorage.setItem("TASKS_TO_DO", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.TO_DO)));
+        localStorage.setItem("TASKS_IN_PROGRESS", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.IN_PROGRESS)));
+        localStorage.setItem("TASKS_BLOCKED", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.BLOCKED)));
+        localStorage.setItem("TASKS_DONE", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.DONE)));
+    }
+
+    static #getTaskListOfPlainObjects(taskList) {
+        const taskListOfPlainObjects = [];
+        if (taskList.length !== 0) {
+            taskList.forEach((task) => {
+                taskListOfPlainObjects.push(
+                    {
+                        id: task.id,
+                        title: task.title,
+                        description: task.description,
+                        assigned: task.assigned,
+                        priority: task.priority,
+                        limitDate: task.limitDate,
+                        state: task.state
+                    }
+                );
+            });
+        }
+        return taskListOfPlainObjects;
+    }
+
+    static saveIdOfTaskClassToStorage() {
+        localStorage.setItem("TASK_CLASS_ID", JSON.stringify(Task.ID));
+    }
+
+    static loadTaskListsFromStorage() {
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_BACKLOG"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_TO_DO"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_IN_PROGRESS"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_BLOCKED"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_DONE"));
+    }
+
+    static #loadTaskListFromStorage(taskListInJSON) {
+        if (taskListInJSON) {
+            const taskListData = JSON.parse(taskListInJSON);
+            // Reconstruye cada tarea usando el constructor de la clase.
+            taskListData.forEach(taskData => {
+                TaskManager.addTask(
+                    taskData.id,
+                    taskData.title,
+                    taskData.description,
+                    taskData.assigned,
+                    taskData.priority,
+                    taskData.limitDate,
+                    taskData.state
+                );
+            });
+        }
+    }
+
+    static loadIdOfTaskClassFromStorage() {
+        Task.ID = localStorage.getItem("TASK_CLASS_ID");
+    }
+}
+
+// #endregion
+
+// #region *** EVENTOS ***
 
 // Muestra el modal en modo Agregar tarea.
 function showAddTaskModal() {
@@ -418,6 +527,7 @@ function cleanInputs() {
     });
 }
 
+// Cambia entre dark mode y light mode.
 function changeMode() {
     document.body.classList.toggle("dark-mode");
 
@@ -441,7 +551,7 @@ HTML_SWITCH_MODE_BUTTON.addEventListener("click", function () {
     changeMode();
 });
 
-// -> Botones para expandir columnas (sólo para Mobile).
+// -> Botones para expandir columnas (sólo para Mobile y Tablet).
 Array.from(HTML_EXPAND_COLUMN_BUTTONS).forEach(button => button.addEventListener("click", function () {
     const siblingContainerTasks = button.previousElementSibling;
     siblingContainerTasks.classList.toggle("occupyAllHeight");
@@ -453,7 +563,15 @@ HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event
     // Para evitar el submit.
     event.preventDefault();
 
-    TaskManager.addTask();
+    TaskManager.addTask(
+        0,
+        HTML_TASK_MODAL_INPUT_TITLE.value,
+        HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
+        HTML_TASK_MODAL_INPUT_ASSIGNED.value,
+        HTML_TASK_MODAL_INPUT_PRIORITY.value,
+        HTML_TASK_MODAL_INPUT_LIMIT_DATE.value,
+        HTML_TASK_MODAL_INPUT_STATE.value
+    );
     showPrincipalPage();
     cleanInputs();
 });
@@ -473,7 +591,14 @@ HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (ev
     // Para evitar el submit.
     event.preventDefault();
 
-    TaskManager.editTaskToEdit();
+    TaskManager.editTaskToEdit(
+        HTML_TASK_MODAL_INPUT_TITLE.value,
+        HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
+        HTML_TASK_MODAL_INPUT_ASSIGNED.value,
+        HTML_TASK_MODAL_INPUT_PRIORITY.value,
+        HTML_TASK_MODAL_INPUT_LIMIT_DATE.value,
+        HTML_TASK_MODAL_INPUT_STATE.value
+    );
     showPrincipalPage();
     cleanInputs();
 });
@@ -496,4 +621,7 @@ HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK.addEventListener("click", function (ev
     showPrincipalPage();
     cleanInputs();
 });
+// #endregion
 
+LocalStorageManager.loadIdOfTaskClassFromStorage();
+LocalStorageManager.loadTaskListsFromStorage();

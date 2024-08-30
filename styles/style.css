@@ -2,6 +2,8 @@
 * {
     box-sizing: border-box;
     transition: all 200ms linear;
+    scrollbar-width: thin;
+    scrollbar-color: #d3d3d3 #ffefd5;
 }
 
 /*** MOBILE ***/
@@ -285,6 +287,11 @@
     .task-form__button--accept {
         background-color: #528932;
     }
+
+    .task-form__button--accept-change-task {
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
 }
 
 /*** TABLET ***/
@@ -465,7 +472,7 @@
         padding: 15px;
 
         /* Tipografía */
-        font-size: 20px;
+        font-size: 15px;
     }
 
     .task-card__title {
@@ -559,9 +566,9 @@
         font-weight: bold;
 
         /* Caja modelo */
-        padding: 2cqh 0;
-        margin: 0 15px;
-        align-self: center;
+        justify-self: center;
+        height: 60%;
+        width: 20cqh;
     }
 
     .task-form__button--cancel {
@@ -824,7 +831,7 @@
 
         /* Diseño de caja */
         grid-template-columns: 50% 50%;
-        grid-template-rows: repeat(3, 14cqh) repeat(2, 8cqh);
+        grid-template-rows: repeat(3, 16cqh) repeat(2, 8cqh);
         align-content: center;
 
         border-left: solid 10px #fea05d;
