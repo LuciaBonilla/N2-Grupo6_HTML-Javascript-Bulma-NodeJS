@@ -20,7 +20,7 @@ const HTML_CONTAINER_IN_PROGRESS = document.getElementsByClassName("task-column_
 const HTML_CONTAINER_BLOCKED = document.getElementsByClassName("task-column__container--blocked")[0];
 const HTML_CONTAINER_DONE = document.getElementsByClassName("task-column__container--done")[0];
 
-// Botones para expandir columnas (sólo para Mobile).
+// Botones para expandir columnas (sólo para Mobile y Tablet).
 const HTML_EXPAND_COLUMN_BUTTONS = document.getElementsByClassName("task-column__expand-button");
 
 // -> Modal.
@@ -56,7 +56,7 @@ const HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK = document.getElementsByClassNam
 // *** Clase Task
 // Función: Guarda la info y la tarjeta HTML de la tarea.
 class Task {
-    static #ID = 1;
+    static #ID = 0;
 
     // Info de la tarea.
     #id;
@@ -76,12 +76,13 @@ class Task {
     #HTMLLimitDate;
 
     constructor(id, title, description, assigned, priority, limitDate, state) {
-        if (id <= Task.#ID) {
+        if (id === -1) {
             ++Task.#ID;
             id = Task.#ID;
         }
-        this.#id = id;
+
         // Inicialización de la info.
+        this.#id = id;
         this.#title = title;
         this.#description = description;
         this.#assigned = assigned;
@@ -116,8 +117,10 @@ class Task {
         });
     }
 
-    static set ID(id){
-        Task.#ID = id;
+    static set ID(id) {
+        if (typeof id === "number") {
+            Task.#ID = id;
+        }
     }
 
     static get ID() {
@@ -164,7 +167,6 @@ class Task {
         this.#priority = priority;
         this.#limitDate = limitDate;
         this.#state = state;
-
         this.#updateHTMLCard();
     }
 
@@ -198,7 +200,7 @@ class Task {
 };
 
 // *** Clase TaskManager
-// Función: Guarda las tarea y las administra; las crea, destruye y actualiza.
+// Función: Guarda las tareas y las administra; las crea, destruye y actualiza.
 class TaskManager {
     // Tarea que se está editando.
     static #TASK_TO_EDIT;
@@ -213,7 +215,7 @@ class TaskManager {
     static #BLOCKED = [];
     static #DONE = [];
 
-    static get GET_TASK_TO_EDIT() {
+    static get TASK_TO_EDIT() {
         return this.#TASK_TO_EDIT;
     }
 
@@ -244,7 +246,7 @@ class TaskManager {
     }
 
     // Añande la tarea a backend y a frontend.
-    static addTask(id, title, description, assigned, priority, limitDate, state) {
+    static addNewTask(id, title, description, assigned, priority, limitDate, state) {
         const newTask = new Task(id, title, description, assigned, priority, limitDate, state);
         const newTaskState = newTask.state;
         let container;
@@ -274,9 +276,6 @@ class TaskManager {
         }
         list.push(newTask);
         container.appendChild(newTask.HTMLCard);
-
-        LocalStorageManager.saveIdOfTaskClassToStorage();
-        LocalStorageManager.saveTaskListsToStorage();
     };
 
     // Elimina la tarea a editar de backend y de frontend.
@@ -317,16 +316,12 @@ class TaskManager {
         });
         this.#TASK_TO_EDIT = null;
         this.#TASK_TO_EDIT_STATE = null;
-
-        LocalStorageManager.saveTaskListsToStorage();
     };
 
-    // Edita la tarea .
+    // Edita la tarea.
     static editTaskToEdit(title, description, assigned, priority, limitDate, state) {
         this.#TASK_TO_EDIT.updateTask(title, description, assigned, priority, limitDate, state);
         this.#moveTaskToEdit();
-
-        LocalStorageManager.saveTaskListsToStorage();
     };
 
     // Mueve la tarea de contenedor si corresponde.
@@ -401,8 +396,9 @@ class TaskManager {
 }
 
 // *** Clase LocalStorageManager
-
+// Función: Guardar las listas de tareas y la ID de la clase Task en el Local Storage.
 class LocalStorageManager {
+    // Guarda las listas de tareas en el Local Storage.
     static saveTaskListsToStorage() {
         localStorage.setItem("TASKS_BACKLOG", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.BACKLOG)));
         localStorage.setItem("TASKS_TO_DO", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.TO_DO)));
@@ -411,6 +407,7 @@ class LocalStorageManager {
         localStorage.setItem("TASKS_DONE", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.DONE)));
     }
 
+    // Obtiene una lista de objetos planos.
     static #getTaskListOfPlainObjects(taskList) {
         const taskListOfPlainObjects = [];
         if (taskList.length !== 0) {
@@ -431,10 +428,12 @@ class LocalStorageManager {
         return taskListOfPlainObjects;
     }
 
+    // Guarda la ID de la clase Task en el Local Storage.
     static saveIdOfTaskClassToStorage() {
-        localStorage.setItem("TASK_CLASS_ID", JSON.stringify(Task.ID));
+        localStorage.setItem("TASK_CLASS_ID", `${Task.ID}`);
     }
 
+    // Carga las listas de tareas del Local Storage.
     static loadTaskListsFromStorage() {
         this.#loadTaskListFromStorage(localStorage.getItem("TASKS_BACKLOG"));
         this.#loadTaskListFromStorage(localStorage.getItem("TASKS_TO_DO"));
@@ -448,7 +447,7 @@ class LocalStorageManager {
             const taskListData = JSON.parse(taskListInJSON);
             // Reconstruye cada tarea usando el constructor de la clase.
             taskListData.forEach(taskData => {
-                TaskManager.addTask(
+                TaskManager.addNewTask(
                     taskData.id,
                     taskData.title,
                     taskData.description,
@@ -461,11 +460,11 @@ class LocalStorageManager {
         }
     }
 
+    // Carga la ID de la clase Task del Local Storage.
     static loadIdOfTaskClassFromStorage() {
-        Task.ID = localStorage.getItem("TASK_CLASS_ID");
+        Task.ID = parseInt(localStorage.getItem("TASK_CLASS_ID"));
     }
 }
-
 // #endregion
 
 // #region *** EVENTOS ***
@@ -504,12 +503,12 @@ function showChangeTaskModal() {
     HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.classList.add("hidden");
 
     // Pone en los inputs los atributos de la tarea actual a editar.
-    HTML_TASK_MODAL_INPUT_TITLE.value = TaskManager.GET_TASK_TO_EDIT.title;
-    HTML_TASK_MODAL_INPUT_DESCRIPTION.value = TaskManager.GET_TASK_TO_EDIT.description;
-    HTML_TASK_MODAL_INPUT_ASSIGNED.value = TaskManager.GET_TASK_TO_EDIT.assigned;
-    HTML_TASK_MODAL_INPUT_PRIORITY.value = TaskManager.GET_TASK_TO_EDIT.priority;
-    HTML_TASK_MODAL_INPUT_STATE.value = TaskManager.GET_TASK_TO_EDIT.state;
-    HTML_TASK_MODAL_INPUT_LIMIT_DATE.value = TaskManager.GET_TASK_TO_EDIT.limitDate;
+    HTML_TASK_MODAL_INPUT_TITLE.value = TaskManager.TASK_TO_EDIT.title;
+    HTML_TASK_MODAL_INPUT_DESCRIPTION.value = TaskManager.TASK_TO_EDIT.description;
+    HTML_TASK_MODAL_INPUT_ASSIGNED.value = TaskManager.TASK_TO_EDIT.assigned;
+    HTML_TASK_MODAL_INPUT_PRIORITY.value = TaskManager.TASK_TO_EDIT.priority;
+    HTML_TASK_MODAL_INPUT_STATE.value = TaskManager.TASK_TO_EDIT.state;
+    HTML_TASK_MODAL_INPUT_LIMIT_DATE.value = TaskManager.TASK_TO_EDIT.limitDate;
 }
 
 // Muestra la pantalla principal.
@@ -541,6 +540,7 @@ function changeMode() {
 }
 
 // *** PÁGINA PRINCIPAL
+
 // -> Botón AGREGAR TAREA en la página principal.
 HTML_BUTTON_ADD_TASK.addEventListener("click", function () {
     showAddTaskModal();
@@ -558,13 +558,14 @@ Array.from(HTML_EXPAND_COLUMN_BUTTONS).forEach(button => button.addEventListener
 }));
 
 // *** MODAL AGREGAR TAREA
+
 // -> Botón ACEPTAR en modo Agregar tarea.
 HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event) {
     // Para evitar el submit.
     event.preventDefault();
 
-    TaskManager.addTask(
-        0,
+    TaskManager.addNewTask(
+        -1,
         HTML_TASK_MODAL_INPUT_TITLE.value,
         HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
         HTML_TASK_MODAL_INPUT_ASSIGNED.value,
@@ -586,6 +587,7 @@ HTML_ADD_TASK_MODAL_BUTTON_CANCEL_TASK.addEventListener("click", function (event
 });
 
 // *** MODAL EDITAR TAREA
+
 // -> Botón ACEPTAR en modo Editar tarea.
 HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event) {
     // Para evitar el submit.
@@ -621,7 +623,18 @@ HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK.addEventListener("click", function (ev
     showPrincipalPage();
     cleanInputs();
 });
-// #endregion
 
-LocalStorageManager.loadIdOfTaskClassFromStorage();
-LocalStorageManager.loadTaskListsFromStorage();
+// *** LOCAL STORAGE
+
+// Para cargar.
+window.addEventListener("DOMContentLoaded", function () {
+    LocalStorageManager.loadIdOfTaskClassFromStorage();
+    LocalStorageManager.loadTaskListsFromStorage();
+});
+
+// Para guardar.
+window.addEventListener("beforeunload", function (event) {
+    LocalStorageManager.saveIdOfTaskClassToStorage();
+    LocalStorageManager.saveTaskListsToStorage();
+});
+// #endregion

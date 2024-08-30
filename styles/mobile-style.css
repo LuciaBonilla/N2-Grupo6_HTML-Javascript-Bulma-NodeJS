@@ -1,0 +1,287 @@
+/*** MOBILE ***/
+@media screen and (max-width: 425px) {
+    body {
+        /* Posicionamiento */
+        position: relative;
+
+        /* Caja modelo */
+        width: 100%;
+        height: 100%;
+
+        /* Tipografía */
+        font-family: Segoe, Segoe UI, Optima, Arial, sans-serif;
+
+        /* Visuales */
+        background-color: #ffcd7b;
+    }
+
+    /* Encabezado. */
+    .header {
+        /* Posicionamiento */
+        position: fixed;
+        z-index: 100;
+
+        /* Caja modelo */
+        width: 100%;
+        display: flex;
+        padding: 5px;
+
+        /* Diseño del contenedor */
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        /* Tipografía */
+        text-shadow: 3px 3px 0 #00112d;
+
+        /* Visuales */
+        background-color: #062a64;
+        color: #ffefd5;
+    }
+
+    .header__title {
+        /* Tipografía */
+        font-size: 8cqw;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .header__group-name {
+        /* Tipografía */
+        font-size: 5cqw;
+    }
+
+    .header__switch-mode-button {
+        /* Posicionamiento */
+        position: fixed;
+        right: 20px;
+        bottom: 70px;
+
+        /* Caja modelo */
+        width: 40px;
+        height: 40px;
+    }
+
+    .header__add-task-button {
+        /* Posicionamiento */
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+
+        /* Caja modelo */
+        width: 40px;
+        height: 40px;
+
+        /* Estilo de caja */
+        border-radius: 50%;
+
+        /* Visuales */
+        background-color: #365c99;
+        box-shadow: 2px 0 #00112d;
+    }
+
+    .header__add-task-button--text {
+        /* Caja modelo */
+        display: none;
+    }
+
+    /* Main. */
+    .main {
+        /* Posicionamiento */
+        z-index: 90;
+
+        /* Caja modelo */
+        display: flex;
+        padding: 25cqw 10px 10px 10px;
+
+        /* Diseño del contenedor */
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Columnas. */
+    .task-column {
+        /* Caja modelo */
+        width: 100%;
+        padding: 10px;
+
+        /* Estilo de caja */
+        border-radius: 5%;
+
+        /* Visuales */
+        background-color: #ffefd5;
+    }
+
+    .task-column__title {
+        /* Caja modelo */
+        padding: 10px;
+
+        /* Tipografía */
+        font-size: 6cqw;
+        font-weight: bold;
+        text-shadow: 1px 1px 0 #00112d;
+    }
+
+    .task-column__container {
+        /* Caja modelo */
+        height: 500px;
+        overflow-y: hidden;
+    }
+
+    .task-column__expand-button {
+        /* Caja modelo */
+        margin-top: 5px;
+    }
+
+    .task-column--backlog {
+        color: #365c99;
+    }
+
+    .task-column--to-do {
+        color: #8a1a09;
+    }
+
+    .task-column--in-progress {
+        color: #bea216;
+    }
+
+    .task-column--blocked {
+        color: #94856d;
+    }
+
+    .task-column--done {
+        color: #4B6306;
+    }
+
+    /* Carta. */
+    .task-card {
+        /* Caja modelo */
+        padding: 15px;
+        margin-bottom: 5px;
+
+        /* Estilo de caja */
+        box-shadow: 4px 4px 0 #ffcd7b;
+        border-radius: 10%;
+
+        /* Tipografía */
+        font-size: 15px;
+
+        /* Visuales */
+        background-color: #fbe5bf;
+    }
+
+    .task-card__title {
+        /* Tipografía */
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    /* Modal. */
+    .task-modal {
+        /* Caja modelo */
+        width: 100%;
+        height: 100%;
+        display: grid;
+
+        /* Diseño de caja */
+        overflow-y: scroll;
+        align-items: center;
+        align-content: center;
+        grid-template-rows: 20cqh 70cqh;
+        grid-template-columns: 100%;
+
+        /* Estilo de caja */
+        border: solid 10px #fea05d;
+
+        /* Visuales */
+        background-color: #062a64;
+        color: #ffefd5;
+    }
+
+    .task-modal__title {
+        /* Tipografía */
+        text-align: center;
+        font-size: 30px;
+        font-weight: bold;
+        text-shadow: 3px 3px 0 #00112d;
+
+        /* Diseño de caja */
+        align-self: center;
+
+        /* Caja modelo */
+        padding: 0 5px;
+    }
+
+    .task-form {
+        /* Caja modelo */
+        display: grid;
+        width: 100%;
+        height: 40cqh;
+
+        /* Diseño de caja */
+        grid-template-columns: 50% 50%;
+        grid-template-rows: repeat(5, 15cqh);
+        align-content: center;
+    }
+
+    .task-form__input {
+        /* Caja modelo */
+        display: flex;
+        padding: 0 5px;
+
+        /* Diseño de caja */
+        flex-direction: column;
+        align-self: center;
+
+        /* Tipografía */
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    .task-form__input input,
+    .task-form__input select {
+        /* Caja modelo */
+        height: 40px;
+
+        /* Tipografía */
+        font-size: 15px;
+
+        /* Visuales */
+        background-color: #ffefd5;
+    }
+
+    .task-form__button {
+        /* Visuales */
+        color: #00112d;
+
+        /* Estilo de caja */
+        border-radius: 10%;
+
+        /* Tipografía */
+        font-weight: bold;
+
+        /* Caja modelo */
+        padding: 10px 0;
+        margin: 0 15px;
+        align-self: center;
+    }
+
+    .task-form__button--cancel {
+        background-color: #dfc339;
+    }
+
+    .task-form__button--delete {
+        background-color: #c63b26;
+    }
+
+    .task-form__button--accept {
+        background-color: #528932;
+    }
+
+    .task-form__button--accept-change-task {
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+}
