@@ -1,4 +1,4 @@
-// *** VARIABLES GLOBALES ***
+// #region *** VARIABLES GLOBALES ***
 
 // *** ELEMENTOS DEL HTML
 
@@ -6,6 +6,11 @@
 const HTML_HEADER = document.getElementsByClassName("header")[0];
 const HTML_BUTTON_ADD_TASK = document.getElementsByClassName("header__add-task-button")[0];
 
+// -> Para el modo oscuro.
+const HTML_SWITCH_MODE_BUTTON = document.getElementsByClassName("header__switch-mode-button")[0];
+const HTML_EMOJI_MODE = document.getElementsByClassName("fa-solid fa-sun")[0];
+
+// -> Main.
 const HTML_MAIN = document.getElementsByClassName("main")[0];
 
 // -> Contenedores para las tareas en cada columna.
@@ -14,6 +19,9 @@ const HTML_CONTAINER_TO_DO = document.getElementsByClassName("task-column__conta
 const HTML_CONTAINER_IN_PROGRESS = document.getElementsByClassName("task-column__container--in-progress")[0];
 const HTML_CONTAINER_BLOCKED = document.getElementsByClassName("task-column__container--blocked")[0];
 const HTML_CONTAINER_DONE = document.getElementsByClassName("task-column__container--done")[0];
+
+// Botones para expandir columnas (sólo para Mobile y Tablet).
+const HTML_EXPAND_COLUMN_BUTTONS = document.getElementsByClassName("task-column__expand-button");
 
 // -> Modal.
 const HTML_TASK_MODAL = document.getElementsByClassName("task-modal")[0];
@@ -41,11 +49,11 @@ const HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK = document.getElementsByClassNam
 const HTML_CHANGE_TASK_MODAL_BUTTON_CANCEL_TASK = document.getElementsByClassName("task-form__button--cancel-change-task")[0];
 const HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK = document.getElementsByClassName("task-form__button--accept-change-task")[0];
 
-//------------------------------------------------------------------------------------------------------------------------
+// #endregion
 
-// ***CLASES***
+// #region *** CLASES ***
 
-// ***Clase Task
+// *** Clase Task
 // Función: Guarda la info y la tarjeta HTML de la tarea.
 class Task {
     static #ID = 0;
@@ -67,15 +75,20 @@ class Task {
     #HTMLPriority;
     #HTMLLimitDate;
 
-    constructor() {
-        // Inicialización de la info; la toma de los inputs del modal.
-        this.#id = ++Task.#ID;
-        this.#title = HTML_TASK_MODAL_INPUT_TITLE.value;
-        this.#description = HTML_TASK_MODAL_INPUT_DESCRIPTION.value;
-        this.#assigned = HTML_TASK_MODAL_INPUT_ASSIGNED.value;
-        this.#priority = HTML_TASK_MODAL_INPUT_PRIORITY.value;
-        this.#limitDate = HTML_TASK_MODAL_INPUT_LIMIT_DATE.value;
-        this.#state = HTML_TASK_MODAL_INPUT_STATE.value;
+    constructor(id, title, description, assigned, priority, limitDate, state) {
+        if (id === -1) {
+            ++Task.#ID;
+            id = Task.#ID;
+        }
+
+        // Inicialización de la info.
+        this.#id = id;
+        this.#title = title;
+        this.#description = description;
+        this.#assigned = assigned;
+        this.#priority = priority;
+        this.#limitDate = limitDate;
+        this.#state = state;
 
         // Inicialización de la tarjeta.
         this.#HTMLCard = document.createElement("article");
@@ -97,11 +110,21 @@ class Task {
         this.#updateHTMLCard();
 
         const task = this;
-        // Se le asigna un event listener.
+        // Se le asigna un event listener a la tarjeta.
         this.#HTMLCard.addEventListener("click", function () {
             TaskManager.changeTaskToEdit(task);
             showChangeTaskModal();
         });
+    }
+
+    static set ID(id) {
+        if (typeof id === "number") {
+            Task.#ID = id;
+        }
+    }
+
+    static get ID() {
+        return Task.#ID;
     }
 
     get id() {
@@ -137,14 +160,13 @@ class Task {
     }
 
     // Actualiza los atributos de la tarea y la tarjeta HTML.
-    updateTask() {
-        this.#title = HTML_TASK_MODAL_INPUT_TITLE.value;
-        this.#description = HTML_TASK_MODAL_INPUT_DESCRIPTION.value;
-        this.#assigned = HTML_TASK_MODAL_INPUT_ASSIGNED.value;
-        this.#priority = HTML_TASK_MODAL_INPUT_PRIORITY.value;
-        this.#limitDate = HTML_TASK_MODAL_INPUT_LIMIT_DATE.value;
-        this.#state = HTML_TASK_MODAL_INPUT_STATE.value;
-
+    updateTask(title, description, assigned, priority, limitDate, state) {
+        this.#title = title;
+        this.#description = description;
+        this.#assigned = assigned;
+        this.#priority = priority;
+        this.#limitDate = limitDate;
+        this.#state = state;
         this.#updateHTMLCard();
     }
 
@@ -153,6 +175,7 @@ class Task {
         this.#HTMLCard.id = `${this.#state}-${this.#id}`;
 
         this.#HTMLTitle.innerHTML = this.#title;
+        this.#HTMLTitle.classList.add("task-card__title");
 
         this.#HTMLDescription.innerHTML = `
             <i class="fa-regular fa-pen-to-square"></i>
@@ -176,6 +199,8 @@ class Task {
     }
 };
 
+// *** Clase TaskManager
+// Función: Guarda las tareas y las administra; las crea, destruye y actualiza.
 class TaskManager {
     // Tarea que se está editando.
     static #TASK_TO_EDIT;
@@ -190,8 +215,28 @@ class TaskManager {
     static #BLOCKED = [];
     static #DONE = [];
 
-    static get GET_TASK_TO_EDIT() {
+    static get TASK_TO_EDIT() {
         return this.#TASK_TO_EDIT;
+    }
+
+    static get BACKLOG() {
+        return this.#BACKLOG;
+    }
+
+    static get TO_DO() {
+        return this.#TO_DO;
+    }
+
+    static get IN_PROGRESS() {
+        return this.#IN_PROGRESS;
+    }
+
+    static get BLOCKED() {
+        return this.#BLOCKED;
+    }
+
+    static get DONE() {
+        return this.#DONE;
     }
 
     // Cambia la tarea a editar actual por otra.
@@ -201,8 +246,8 @@ class TaskManager {
     }
 
     // Añande la tarea a backend y a frontend.
-    static addTask() {
-        const newTask = new Task();
+    static addNewTask(id, title, description, assigned, priority, limitDate, state) {
+        const newTask = new Task(id, title, description, assigned, priority, limitDate, state);
         const newTaskState = newTask.state;
         let container;
         let list;
@@ -273,9 +318,9 @@ class TaskManager {
         this.#TASK_TO_EDIT_STATE = null;
     };
 
-    // Edita la tarea 
-    static editTaskToEdit() {
-        this.#TASK_TO_EDIT.updateTask();
+    // Edita la tarea.
+    static editTaskToEdit(title, description, assigned, priority, limitDate, state) {
+        this.#TASK_TO_EDIT.updateTask(title, description, assigned, priority, limitDate, state);
         this.#moveTaskToEdit();
     };
 
@@ -339,6 +384,7 @@ class TaskManager {
             oldList.forEach((task, index) => {
                 if (task.id === taskToMoveId) {
                     oldList.splice(index, 1);
+                    return;
                 }
             });
             newList.push(this.#TASK_TO_EDIT);
@@ -349,17 +395,84 @@ class TaskManager {
     }
 }
 
-//------------------------------------------------------------------------------------------------------------------------
-// *** EVENTOS ***
+// *** Clase LocalStorageManager
+// Función: Guardar las listas de tareas y la ID de la clase Task en el Local Storage.
+class LocalStorageManager {
+    // Guarda las listas de tareas en el Local Storage.
+    static saveTaskListsToStorage() {
+        localStorage.setItem("TASKS_BACKLOG", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.BACKLOG)));
+        localStorage.setItem("TASKS_TO_DO", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.TO_DO)));
+        localStorage.setItem("TASKS_IN_PROGRESS", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.IN_PROGRESS)));
+        localStorage.setItem("TASKS_BLOCKED", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.BLOCKED)));
+        localStorage.setItem("TASKS_DONE", JSON.stringify(this.#getTaskListOfPlainObjects(TaskManager.DONE)));
+    }
+
+    // Obtiene una lista de objetos planos.
+    static #getTaskListOfPlainObjects(taskList) {
+        const taskListOfPlainObjects = [];
+        if (taskList.length !== 0) {
+            taskList.forEach((task) => {
+                taskListOfPlainObjects.push(
+                    {
+                        id: task.id,
+                        title: task.title,
+                        description: task.description,
+                        assigned: task.assigned,
+                        priority: task.priority,
+                        limitDate: task.limitDate,
+                        state: task.state
+                    }
+                );
+            });
+        }
+        return taskListOfPlainObjects;
+    }
+
+    // Guarda la ID de la clase Task en el Local Storage.
+    static saveIdOfTaskClassToStorage() {
+        localStorage.setItem("TASK_CLASS_ID", `${Task.ID}`);
+    }
+
+    // Carga las listas de tareas del Local Storage.
+    static loadTaskListsFromStorage() {
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_BACKLOG"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_TO_DO"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_IN_PROGRESS"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_BLOCKED"));
+        this.#loadTaskListFromStorage(localStorage.getItem("TASKS_DONE"));
+    }
+
+    static #loadTaskListFromStorage(taskListInJSON) {
+        if (taskListInJSON) {
+            const taskListData = JSON.parse(taskListInJSON);
+            // Reconstruye cada tarea usando el constructor de la clase.
+            taskListData.forEach(taskData => {
+                TaskManager.addNewTask(
+                    taskData.id,
+                    taskData.title,
+                    taskData.description,
+                    taskData.assigned,
+                    taskData.priority,
+                    taskData.limitDate,
+                    taskData.state
+                );
+            });
+        }
+    }
+
+    // Carga la ID de la clase Task del Local Storage.
+    static loadIdOfTaskClassFromStorage() {
+        Task.ID = parseInt(localStorage.getItem("TASK_CLASS_ID"));
+    }
+}
+// #endregion
+
+// #region *** EVENTOS ***
 
 // Muestra el modal en modo Agregar tarea.
 function showAddTaskModal() {
-    // Oculta la pantalla principal.
-    HTML_HEADER.classList.add("hidden");
-    HTML_MAIN.classList.add("hidden");
-
-    // Muestra el modal en modo Agregar tarea.
-    HTML_TASK_MODAL.classList.remove("hidden");
+    HTML_TASK_MODAL.classList.remove("down");
+    HTML_TASK_MODAL.classList.add("over");
 
     // Muestra el título correspondiente.
     HTML_TASK_MODAL_ADD_TASK_TITLE.classList.remove("hidden");
@@ -375,12 +488,8 @@ function showAddTaskModal() {
 
 // Muestra el modal en modo Editar tarea.
 function showChangeTaskModal() {
-    // Oculta la pantalla principal.
-    HTML_HEADER.classList.add("hidden");
-    HTML_MAIN.classList.add("hidden");
-
-    // Muestra el modal en modo Editar tarea.
-    HTML_TASK_MODAL.classList.remove("hidden");
+    HTML_TASK_MODAL.classList.remove("down");
+    HTML_TASK_MODAL.classList.add("over");
 
     // Muestra el título correspondiente.
     HTML_TASK_MODAL_ADD_TASK_TITLE.classList.add("hidden");
@@ -394,20 +503,19 @@ function showChangeTaskModal() {
     HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.classList.add("hidden");
 
     // Pone en los inputs los atributos de la tarea actual a editar.
-    HTML_TASK_MODAL_INPUT_TITLE.value = TaskManager.GET_TASK_TO_EDIT.title;
-    HTML_TASK_MODAL_INPUT_DESCRIPTION.value = TaskManager.GET_TASK_TO_EDIT.description;
-    HTML_TASK_MODAL_INPUT_ASSIGNED.value = TaskManager.GET_TASK_TO_EDIT.assigned;
-    HTML_TASK_MODAL_INPUT_PRIORITY.value = TaskManager.GET_TASK_TO_EDIT.priority;
-    HTML_TASK_MODAL_INPUT_STATE.value = TaskManager.GET_TASK_TO_EDIT.state;
-    HTML_TASK_MODAL_INPUT_LIMIT_DATE.value = TaskManager.GET_TASK_TO_EDIT.limitDate;
+    HTML_TASK_MODAL_INPUT_TITLE.value = TaskManager.TASK_TO_EDIT.title;
+    HTML_TASK_MODAL_INPUT_DESCRIPTION.value = TaskManager.TASK_TO_EDIT.description;
+    HTML_TASK_MODAL_INPUT_ASSIGNED.value = TaskManager.TASK_TO_EDIT.assigned;
+    HTML_TASK_MODAL_INPUT_PRIORITY.value = TaskManager.TASK_TO_EDIT.priority;
+    HTML_TASK_MODAL_INPUT_STATE.value = TaskManager.TASK_TO_EDIT.state;
+    HTML_TASK_MODAL_INPUT_LIMIT_DATE.value = TaskManager.TASK_TO_EDIT.limitDate;
 }
 
 // Muestra la pantalla principal.
 function showPrincipalPage() {
     // Muestra la página principal y oculta el modal.
-    HTML_HEADER.classList.remove("hidden");
-    HTML_MAIN.classList.remove("hidden");
-    HTML_TASK_MODAL.classList.add("hidden");
+    HTML_TASK_MODAL.classList.remove("over");
+    HTML_TASK_MODAL.classList.add("down");
 }
 
 // Limpia los inputs.
@@ -418,19 +526,53 @@ function cleanInputs() {
     });
 }
 
+// Cambia entre dark mode y light mode.
+function changeMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (HTML_EMOJI_MODE.classList.contains("fa-sun")) {
+        HTML_EMOJI_MODE.classList.remove("fa-sun");
+        HTML_EMOJI_MODE.classList.add("fa-moon"); // Cambiar al icono de luna (modo oscuro)
+    } else {
+        HTML_EMOJI_MODE.classList.remove("fa-moon");
+        HTML_EMOJI_MODE.classList.add("fa-sun"); // Cambiar al icono de sol (modo claro)
+    }
+}
+
 // *** PÁGINA PRINCIPAL
+
 // -> Botón AGREGAR TAREA en la página principal.
 HTML_BUTTON_ADD_TASK.addEventListener("click", function () {
     showAddTaskModal();
 });
 
+// -> Modo oscuro.
+HTML_SWITCH_MODE_BUTTON.addEventListener("click", function () {
+    changeMode();
+});
+
+// -> Botones para expandir columnas (sólo para Mobile y Tablet).
+Array.from(HTML_EXPAND_COLUMN_BUTTONS).forEach(button => button.addEventListener("click", function () {
+    const siblingContainerTasks = button.previousElementSibling;
+    siblingContainerTasks.classList.toggle("occupyAllHeight");
+}));
+
 // *** MODAL AGREGAR TAREA
+
 // -> Botón ACEPTAR en modo Agregar tarea.
 HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event) {
     // Para evitar el submit.
     event.preventDefault();
 
-    TaskManager.addTask();
+    TaskManager.addNewTask(
+        -1,
+        HTML_TASK_MODAL_INPUT_TITLE.value,
+        HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
+        HTML_TASK_MODAL_INPUT_ASSIGNED.value,
+        HTML_TASK_MODAL_INPUT_PRIORITY.value,
+        HTML_TASK_MODAL_INPUT_LIMIT_DATE.value,
+        HTML_TASK_MODAL_INPUT_STATE.value
+    );
     showPrincipalPage();
     cleanInputs();
 });
@@ -445,12 +587,20 @@ HTML_ADD_TASK_MODAL_BUTTON_CANCEL_TASK.addEventListener("click", function (event
 });
 
 // *** MODAL EDITAR TAREA
+
 // -> Botón ACEPTAR en modo Editar tarea.
 HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event) {
     // Para evitar el submit.
     event.preventDefault();
 
-    TaskManager.editTaskToEdit();
+    TaskManager.editTaskToEdit(
+        HTML_TASK_MODAL_INPUT_TITLE.value,
+        HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
+        HTML_TASK_MODAL_INPUT_ASSIGNED.value,
+        HTML_TASK_MODAL_INPUT_PRIORITY.value,
+        HTML_TASK_MODAL_INPUT_LIMIT_DATE.value,
+        HTML_TASK_MODAL_INPUT_STATE.value
+    );
     showPrincipalPage();
     cleanInputs();
 });
@@ -473,3 +623,18 @@ HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK.addEventListener("click", function (ev
     showPrincipalPage();
     cleanInputs();
 });
+
+// *** LOCAL STORAGE
+
+// Para cargar.
+window.addEventListener("DOMContentLoaded", function () {
+    LocalStorageManager.loadIdOfTaskClassFromStorage();
+    LocalStorageManager.loadTaskListsFromStorage();
+});
+
+// Para guardar.
+window.addEventListener("beforeunload", function (event) {
+    LocalStorageManager.saveIdOfTaskClassToStorage();
+    LocalStorageManager.saveTaskListsToStorage();
+});
+// #endregion

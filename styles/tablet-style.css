@@ -1,0 +1,294 @@
+/*** TABLET ***/
+@media screen and (min-width: 425px) and (max-width: 768px) {
+    body {
+        /* Posicionamiento */
+        position: relative;
+
+        /* Caja modelo */
+        width: 100%;
+        height: 100%;
+
+        /* Tipografía */
+        font-family: Segoe, Segoe UI, Optima, Arial, sans-serif;
+
+        /* Visuales */
+        background-color: #ffcd7b;
+    }
+
+    /* Encabezado. */
+    .header {
+        /* Posicionamiento */
+        position: fixed;
+        z-index: 100;
+
+        /* Caja modelo */
+        width: 100%;
+        display: flex;
+        padding: 10px 30px;
+
+        /* Diseño del contenedor */
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+
+        /* Tipografía */
+        text-shadow: 3px 3px 0 #00112d;
+
+        /* Visuales */
+        background-color: #062a64;
+        color: #ffefd5;
+    }
+
+    .header__title {
+        /* Tipografía */
+        font-size: 6cqw;
+        font-weight: bold;
+    }
+
+    .header__group-name {
+        /* Tipografía */
+        font-size: 3cqw;
+    }
+
+    .header__switch-mode-button {
+        /* Posicionamiento */
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+
+        /* Tipografía */
+        font-size: 20px;
+
+        /* Caja modelo */
+        width: 50px;
+        height: 50px;
+    }
+
+    .header__add-task-button {
+        /* Caja modelo */
+        display: flex;
+        padding: 10px;
+
+        /* Posicionamiento */
+        position: absolute;
+        top: 5cqw;
+        right: 10px;
+
+        /* Estilo de caja */
+        box-shadow: 2px 0 #00112d;
+
+        /* Diseño de caja */
+        align-items: center;
+
+        /* Visuales */
+        background-color: #365c99;
+
+        /* Tipografía */
+        font-size: 2cqw;
+    }
+
+    .header__add-task-button--text {
+        padding: 0 0 0 5px;
+    }
+
+    /* Main. */
+    .main {
+        /* Posicionamiento */
+        z-index: 90;
+
+        /* Caja modelo */
+        display: flex;
+        padding: 20cqw 10px 10px 10px;
+
+        /* Diseño de caja */
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Columnas. */
+    .task-column {
+        /* Visuales */
+        background-color: #ffefd5;
+
+        /* Caja modelo */
+        min-width: 33%;
+        max-width: 50%;
+        padding: 10px;
+
+        /* Diseño de caja */
+        border-radius: 5%;
+        flex-grow: 1;
+    }
+
+    .task-column__title {
+        /* Caja modelo */
+        padding: 10px;
+
+        /* Tipografía */
+        font-size: 5cqw;
+        font-weight: bold;
+        text-shadow: 1px 1px 0 #00112d;
+    }
+
+    .task-column__container {
+        height: 600px;
+        overflow-y: hidden;
+    }
+
+    .task-column__expand-button {
+        /* Caja modelo */
+        margin-top: 5px;
+    }
+
+    .task-column--backlog {
+        color: #365c99;
+    }
+
+    .task-column--to-do {
+        color: #8a1a09;
+    }
+
+    .task-column--in-progress {
+        color: #bea216;
+    }
+
+    .task-column--blocked {
+        color: #94856d;
+    }
+
+    .task-column--done {
+        color: #4B6306;
+    }
+
+    /* Carta. */
+    .task-card {
+        /* Visuales */
+        background-color: #fbe5bf;
+
+        /* Estilo de caja */
+        box-shadow: 4px 4px 0 #ffcd7b;
+        border-radius: 10%;
+
+        /* Caja modelo */
+        margin-bottom: 5px;
+        padding: 15px;
+
+        /* Tipografía */
+        font-size: 15px;
+    }
+
+    .task-card__title {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    /* Modal. */
+    .task-modal {
+        /* Caja modelo */
+        width: 100%;
+        height: 100%;
+        display: grid;
+
+        /* Diseño de caja */
+        overflow-y: scroll;
+        align-items: center;
+        align-content: center;
+        grid-template-rows: 20cqh 70cqh;
+        grid-template-columns: 100%;
+
+        /* Estilo de caja */
+        border: solid 10px #fea05d;
+
+        /* Visuales */
+        background-color: #062a64;
+        color: #ffefd5;
+    }
+
+    .task-modal__title {
+        /* Tipografía */
+        text-align: center;
+        font-size: 6cqh;
+        font-weight: bold;
+        text-shadow: 3px 3px 0 #00112d;
+
+        /* Diseño de caja */
+        align-self: center;
+
+        /* Caja modelo */
+        padding: 0 5px;
+    }
+
+    .task-form {
+        /* Caja modelo */
+        display: grid;
+        width: 100%;
+        height: 40cqh;
+
+        /* Diseño de caja */
+        grid-template-columns: 50% 50%;
+        grid-template-rows: repeat(5, 15cqh);
+        align-content: center;
+    }
+
+    .task-form__input {
+        /* Caja modelo */
+        display: flex;
+        padding: 0 5px;
+
+        /* Diseño de caja */
+        flex-direction: column;
+        align-self: center;
+
+        /* Tipografía */
+        font-size: 3cqh;
+        font-weight: bold;
+    }
+
+    .task-form__input input,
+    .task-form__input select {
+        /* Caja modelo */
+        height: 6cqh;
+
+        /* Tipografía */
+        font-size: 3cqh;
+
+        /* Visuales */
+        background-color: #ffefd5;
+    }
+
+    .task-form__button {
+        /* Visuales */
+        color: #00112d;
+
+        /* Estilo de caja */
+        border-radius: 10%;
+
+        /* Tipografía */
+        font-size: 2cqh;
+        font-weight: bold;
+
+        /* Caja modelo */
+        justify-self: center;
+        height: 60%;
+        width: 20cqh;
+    }
+
+    .task-form__button--cancel {
+        background-color: #dfc339;
+    }
+
+    .task-form__button--delete {
+        background-color: #c63b26;
+    }
+
+    .task-form__button--accept {
+        background-color: #528932;
+    }
+
+    .task-form__button--accept-change-task {
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+}

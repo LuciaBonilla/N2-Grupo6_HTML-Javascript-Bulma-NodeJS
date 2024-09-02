@@ -1,0 +1,7 @@
+/* Reglas de estilo comunes a los tres tamaños.*/
+* {
+    box-sizing: border-box;
+    transition: all 200ms linear;
+    scrollbar-width: thin;
+    scrollbar-color: #d3d3d3 #ffefd5;
+}
