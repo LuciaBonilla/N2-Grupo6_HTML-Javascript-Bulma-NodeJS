@@ -2,9 +2,13 @@
 ## Grupo 6 - N2
 
 ### Integrantes :runner:
+
 Carlos Nicolas Gonzalez
+
 Lucía Bonilla
+
 Guillermo Tula
+
 Germán Marquez
 
 ### Objetivo :clipboard:
