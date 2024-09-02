@@ -1,17 +1,17 @@
 # Gestor de tareas
 ## Grupo 6 - N2
 
-### Integrantes:
+### Integrantes :runner:
 Carlos Nicolas Gonzalez
 Lucía Bonilla
 Guillermo Tula
 Germán Marquez
 
-### Objetivo
+### Objetivo :clipboard:
 
-- La consigna es crear un gestor de tareas web, similar al que ofrecen varias plataformas del mercado, como Trello. :clipboard:
+- La consigna es crear un gestor de tareas web, similar al que ofrecen varias plataformas del mercado, como Trello.
 
-### Checklist
+### Checklist :ballot_box_with_check:
 
 - Hay con 5 columnas, cada una de ellas representando el estado en el que se puede encontrara una tarea: Backlog, To Do, In Progress, Blocked y Done. :white_check_mark:
 - De cada tarea, se maneja la siguiente información: :white_check_mark:
