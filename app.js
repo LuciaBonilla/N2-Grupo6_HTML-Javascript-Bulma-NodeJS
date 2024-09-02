@@ -48,7 +48,6 @@ const HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK = document.getElementsByClassName("
 const HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK = document.getElementsByClassName("task-form__button--delete-change-task")[0];
 const HTML_CHANGE_TASK_MODAL_BUTTON_CANCEL_TASK = document.getElementsByClassName("task-form__button--cancel-change-task")[0];
 const HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK = document.getElementsByClassName("task-form__button--accept-change-task")[0];
-
 // #endregion
 
 // #region *** CLASES ***
@@ -56,6 +55,7 @@ const HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK = document.getElementsByClassNam
 // *** Clase Task
 // Función: Guarda la info y la tarjeta HTML de la tarea.
 class Task {
+    // ID de clase para ayudar a poner IDs individuales a las tareas.
     static #ID = 0;
 
     // Info de la tarea.
@@ -75,7 +75,9 @@ class Task {
     #HTMLPriority;
     #HTMLLimitDate;
 
+    // Método constructor.
     constructor(id, title, description, assigned, priority, limitDate, state) {
+        // Esto es en caso de que sea la primera vez que se crea la tarjeta y que no haya sido cargada en el Local Storage.
         if (id === -1) {
             ++Task.#ID;
             id = Task.#ID;
@@ -110,13 +112,39 @@ class Task {
         this.#updateHTMLCard();
 
         const task = this;
-        // Se le asigna un event listener a la tarjeta.
-        this.#HTMLCard.addEventListener("click", function () {
+        const card = this.#HTMLCard;
+
+        // Se le asigna events listeners a la tarjeta.
+
+        // Evento para cuando se quiere editar la tarea.
+        card.addEventListener("click", function () {
+            // Le dice al TaskManager que es la tarea a editar.
             TaskManager.changeTaskToEdit(task);
+
+            // Muestra el modal para editar tarea.
             showChangeTaskModal();
+        });
+
+        // Evento para cuando se inicia el arrastre de la tarjeta.
+        card.addEventListener("dragstart", function (event) {
+            // Le dice al TaskManager que es la tarea a editar.
+            TaskManager.changeTaskToEdit(task);
+
+            // Establece los datos que se transferirán en el arrastre, en este caso, la tarjeta.
+            event.dataTransfer.setData("text/plain", event.target.id);
+
+            // Indica que se está draggeando.
+            card.classList.add("dragging");
+        });
+
+        // Evento para cuando se termina el arrastre de la tarjeta.
+        card.addEventListener("dragend", function () {
+            // Indica que no se está draggeando.
+            card.classList.remove("dragging");
         });
     }
 
+    // Getters y setters.
     static set ID(id) {
         if (typeof id === "number") {
             Task.#ID = id;
@@ -151,6 +179,12 @@ class Task {
         return this.#limitDate;
     }
 
+    set state(newState) {
+        if (newState === "Backlog" || newState === "To Do" || newState === "In Progress" || newState === "Blocked" || newState === "To Do") {
+            this.#state = newState;
+        }
+    }
+
     get state() {
         return this.#state;
     }
@@ -172,7 +206,8 @@ class Task {
 
     // Actualiza sólo la tarjeta HTML.
     #updateHTMLCard() {
-        this.#HTMLCard.id = `${this.#state}-${this.#id}`;
+        this.#HTMLCard.id = `task-card_${this.#id}`;
+        this.#HTMLCard.draggable = true;
 
         this.#HTMLTitle.innerHTML = this.#title;
         this.#HTMLTitle.classList.add("task-card__title");
@@ -202,10 +237,10 @@ class Task {
 // *** Clase TaskManager
 // Función: Guarda las tareas y las administra; las crea, destruye y actualiza.
 class TaskManager {
-    // Tarea que se está editando.
+    // Tarea actual que se está editando.
     static #TASK_TO_EDIT;
 
-    // Estado de la tarea que se está editando.
+    // Estado de la tarea actual que se está editando.
     static #TASK_TO_EDIT_STATE;
 
     // Listas que guardan las tareas.
@@ -215,6 +250,7 @@ class TaskManager {
     static #BLOCKED = [];
     static #DONE = [];
 
+    // Getters.
     static get TASK_TO_EDIT() {
         return this.#TASK_TO_EDIT;
     }
@@ -318,65 +354,102 @@ class TaskManager {
         this.#TASK_TO_EDIT_STATE = null;
     };
 
-    // Edita la tarea.
+    // Edita todos los atributos de la tarea actual que se está editando; la cambia de lugar en backend y frontend si corresponde.
     static editTaskToEdit(title, description, assigned, priority, limitDate, state) {
         this.#TASK_TO_EDIT.updateTask(title, description, assigned, priority, limitDate, state);
-        this.#moveTaskToEdit();
+        this.moveTaskToEditToCorrectList();
+        this.#moveTaskToEditToCorrectContainer();
     };
 
-    // Mueve la tarea de contenedor si corresponde.
-    static #moveTaskToEdit() {
-        const taskToMoveId = this.#TASK_TO_EDIT.id;
+    // Mueve la tarjeta de la tarea al contenedor correcto - parte frontend.
+    static #moveTaskToEditToCorrectContainer() {
         const taskToMoveOldState = this.#TASK_TO_EDIT_STATE;
         const taskToMoveActualState = this.#TASK_TO_EDIT.state;
 
         if (taskToMoveOldState !== taskToMoveActualState) {
             let oldContainer;
-            let oldList;
             switch (taskToMoveOldState) {
                 case "Backlog":
                     oldContainer = HTML_CONTAINER_BACKLOG;
-                    oldList = this.#BACKLOG;
                     break;
                 case "To Do":
                     oldContainer = HTML_CONTAINER_TO_DO;
-                    oldList = this.#TO_DO;
                     break;
                 case "In Progress":
                     oldContainer = HTML_CONTAINER_IN_PROGRESS;
-                    oldList = this.#IN_PROGRESS;
                     break;
                 case "Blocked":
                     oldContainer = HTML_CONTAINER_BLOCKED;
-                    oldList = this.#BLOCKED;
                     break;
                 case "Done":
                     oldContainer = HTML_CONTAINER_DONE;
-                    oldList = this.#DONE;
                     break;
             }
 
             let newContainer;
-            let newList;
             switch (taskToMoveActualState) {
                 case "Backlog":
                     newContainer = HTML_CONTAINER_BACKLOG;
-                    newList = this.#BACKLOG;
                     break;
                 case "To Do":
                     newContainer = HTML_CONTAINER_TO_DO;
-                    newList = this.#TO_DO;
                     break;
                 case "In Progress":
                     newContainer = HTML_CONTAINER_IN_PROGRESS;
-                    newList = this.#IN_PROGRESS;
                     break;
                 case "Blocked":
                     newContainer = HTML_CONTAINER_BLOCKED;
-                    newList = this.#BLOCKED;
                     break;
                 case "Done":
                     newContainer = HTML_CONTAINER_DONE;
+                    break;
+            }
+            oldContainer.removeChild(this.#TASK_TO_EDIT.HTMLCard);
+            newContainer.appendChild(this.#TASK_TO_EDIT.HTMLCard);
+        }
+    }
+
+    // Mueve la tarea a la lista correcta - parte backend.
+    static moveTaskToEditToCorrectList() {
+        const taskToMoveId = this.#TASK_TO_EDIT.id;
+        const taskToMoveOldState = this.#TASK_TO_EDIT_STATE;
+        const taskToMoveActualState = this.#TASK_TO_EDIT.state;
+
+        if (taskToMoveOldState !== taskToMoveActualState) {
+            let oldList;
+            switch (taskToMoveOldState) {
+                case "Backlog":
+                    oldList = this.#BACKLOG;
+                    break;
+                case "To Do":
+                    oldList = this.#TO_DO;
+                    break;
+                case "In Progress":
+                    oldList = this.#IN_PROGRESS;
+                    break;
+                case "Blocked":
+                    oldList = this.#BLOCKED;
+                    break;
+                case "Done":
+                    oldList = this.#DONE;
+                    break;
+            }
+
+            let newList;
+            switch (taskToMoveActualState) {
+                case "Backlog":
+                    newList = this.#BACKLOG;
+                    break;
+                case "To Do":
+                    newList = this.#TO_DO;
+                    break;
+                case "In Progress":
+                    newList = this.#IN_PROGRESS;
+                    break;
+                case "Blocked":
+                    newList = this.#BLOCKED;
+                    break;
+                case "Done":
                     newList = this.#DONE;
                     break;
             }
@@ -388,10 +461,17 @@ class TaskManager {
                 }
             });
             newList.push(this.#TASK_TO_EDIT);
-
-            oldContainer.removeChild(this.#TASK_TO_EDIT.HTMLCard);
-            newContainer.appendChild(this.#TASK_TO_EDIT.HTMLCard);
         }
+    }
+
+    // Retorna una tarea por la id.
+    static searchTaskById(taskToSearchId) {
+        // Buscar en cada lista y retornar la primera coincidencia encontrada
+        return this.#BACKLOG.find(task => task.id === taskToSearchId) ||
+            this.#TO_DO.find(task => task.id === taskToSearchId) ||
+            this.#IN_PROGRESS.find(task => task.id === taskToSearchId) ||
+            this.#BLOCKED.find(task => task.id === taskToSearchId) ||
+            this.#DONE.find(task => task.id === taskToSearchId);
     }
 }
 
@@ -539,6 +619,70 @@ function changeMode() {
     }
 }
 
+// Mueve la tarjeta de una tarea dentro de un contenedor mediante drag - parte frontend.
+function dragTaskCardkOver(e, container) {
+    e.preventDefault(); // Necesario para permitir el drop.
+
+    // Selecciona la tarjeta actual que se está arrastrando.
+    const draggingCard = document.querySelector(".dragging");
+
+    // Busca la tarjeta hermana inferior para colocar la tarjeta que se está arrastrando encima de ella.
+    // clientY es la posición actual en Y del mouse.
+    const afterElement = getDragAfterElement(container, e.clientY);
+    if (afterElement == null) {
+        container.appendChild(draggingCard);
+    } else {
+        container.insertBefore(draggingCard, afterElement);
+    }
+}
+
+// Después de mover una tarjeta de tarea a un contenedor, cambia el estado de la tarea según el contenedor donde quedó la tarjeta - parte backend.
+function dropTaskCard(e, container) {
+    e.preventDefault(); // Evita la apertura de enlaces si hay algún drop inesperado.
+
+    const draggingCard = document.querySelector(".dragging");
+    const taskCardId = parseInt(draggingCard.id.split("_")[1]);
+    const task = TaskManager.searchTaskById(taskCardId);
+    const containerName = container.classList[1].split("--")[1];
+
+    let newState;
+    switch (containerName) {
+        case "backlog":
+            newState = "Backlog";
+            break;
+        case "to-do":
+            newState = "To Do";
+            break;
+        case "in-progress":
+            newState = "In Progress";
+            break;
+        case "blocked":
+            newState = "Blocked"
+            break;
+        case "done":
+            newState = "Done";
+    }
+
+    task.state = newState;
+    TaskManager.moveTaskToEditToCorrectList();
+}
+
+// Obtiene el elemento después del cual se soltará la tarjeta.
+function getDragAfterElement(container, y) {
+    // Obtiene todas las tarjetas que no se están arrastrando actualmente.
+    const draggableElements = [...container.querySelectorAll(".task-card:not(.dragging)")];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
 // *** PÁGINA PRINCIPAL
 
 // -> Botón AGREGAR TAREA en la página principal.
@@ -556,6 +700,42 @@ Array.from(HTML_EXPAND_COLUMN_BUTTONS).forEach(button => button.addEventListener
     const siblingContainerTasks = button.previousElementSibling;
     siblingContainerTasks.classList.toggle("occupyAllHeight");
 }));
+
+// -> Drag and drop para los contenedores de tarjetas de tarea.
+HTML_CONTAINER_BACKLOG.addEventListener("dragover", function (event) {
+    dragTaskCardkOver(event, HTML_CONTAINER_BACKLOG);
+});
+HTML_CONTAINER_BACKLOG.addEventListener("drop", function (event) {
+    dropTaskCard(event, HTML_CONTAINER_BACKLOG);
+});
+
+HTML_CONTAINER_TO_DO.addEventListener("dragover", function (event) {
+    dragTaskCardkOver(event, HTML_CONTAINER_TO_DO);
+});
+HTML_CONTAINER_TO_DO.addEventListener("drop", function (event) {
+    dropTaskCard(event, HTML_CONTAINER_TO_DO);
+});
+
+HTML_CONTAINER_IN_PROGRESS.addEventListener("dragover", function (event) {
+    dragTaskCardkOver(event, HTML_CONTAINER_IN_PROGRESS);
+});
+HTML_CONTAINER_IN_PROGRESS.addEventListener("drop", function (event) {
+    dropTaskCard(event, HTML_CONTAINER_IN_PROGRESS);
+});
+
+HTML_CONTAINER_BLOCKED.addEventListener("dragover", function (event) {
+    dragTaskCardkOver(event, HTML_CONTAINER_BLOCKED);
+});
+HTML_CONTAINER_BLOCKED.addEventListener("drop", function (event) {
+    dropTaskCard(event, HTML_CONTAINER_BLOCKED);
+});
+
+HTML_CONTAINER_DONE.addEventListener("dragover", function (event) {
+    dragTaskCardkOver(event, HTML_CONTAINER_DONE);
+});
+HTML_CONTAINER_DONE.addEventListener("drop", function (event) {
+    dropTaskCard(event, HTML_CONTAINER_DONE);
+});
 
 // *** MODAL AGREGAR TAREA
 
