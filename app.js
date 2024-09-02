@@ -180,7 +180,7 @@ class Task {
     }
 
     set state(newState) {
-        if (newState === "Backlog" || newState === "To Do" || newState === "In Progress" || newState === "Blocked" || newState === "To Do") {
+        if (newState === "Backlog" || newState === "To Do" || newState === "In Progress" || newState === "Blocked" || newState === "Done") {
             this.#state = newState;
         }
     }
