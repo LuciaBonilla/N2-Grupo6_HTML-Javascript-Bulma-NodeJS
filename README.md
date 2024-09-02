@@ -38,3 +38,4 @@ Germán Marquez
 - Los estilos se ajustan para Mobile, Tablet y Desktop. :white_check_mark:
 - La web cuenta con la posibilidad de cambiar entre modo Dark y Light :white_check_mark:
 - Se puede cambiar el estado de las tareas arrastrandolas entre las columnas (drag and drop). :white_check_mark:
+- Las tareas se guardan en el Local Storage, de este modo, al recargar la página no se borran. :white_check_mark:
