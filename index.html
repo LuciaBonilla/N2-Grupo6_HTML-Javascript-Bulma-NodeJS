@@ -6,8 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="bulma/css/bulma.min.css">
-    <link rel="stylesheet" href="icons/css/all.min.css">
+    <link rel="stylesheet" href="assets/bulma/css/bulma.min.css">
+    <link rel="stylesheet" href="assets/icons/css/all.min.css">
 
     <!-- Estilos. -->
     <link rel="stylesheet" href="styles/global-style.css">
@@ -18,8 +18,8 @@
     <link rel="stylesheet" href="styles/special-rules.css">
     <link rel="stylesheet" href="styles/dark-mode.css">
 
-    <!-- Script JS. -->
-    <script src="app.js" defer></script>
+    <!-- Scripts JS. -->
+    <script type="module" src="src/app.js" defer></script>
 </head>
 
 <!-- Maquetación con metodología BEM (Block__Element--Modifier). -->
@@ -156,11 +156,7 @@
             <!-- Asignado. -->
             <div class="task-form__input">
                 <label>Asignado</label>
-                <select id="assigned">
-                    <option>Amelia</option>
-                    <option>Marco</option>
-                    <option>Polo</option>
-                </select>
+                <input id="assigned" type="text" placeholder="ASIGNADO">
             </div>
 
             <!-- Prioridad. -->
