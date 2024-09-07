@@ -38,12 +38,12 @@ export function handleShowChangeTaskModal() {
     HTMLElements.HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.classList.add("hidden");
 
     // Pone en los inputs los atributos de la tarea actual a editar.
-    HTMLElements.HTML_TASK_MODAL_INPUT_TITLE.value = TaskManager.TASK_TO_EDIT.title;
-    HTMLElements.HTML_TASK_MODAL_INPUT_DESCRIPTION.value = TaskManager.TASK_TO_EDIT.description;
-    HTMLElements.HTML_TASK_MODAL_INPUT_ASSIGNED.value = TaskManager.TASK_TO_EDIT.assigned;
-    HTMLElements.HTML_TASK_MODAL_INPUT_PRIORITY.value = TaskManager.TASK_TO_EDIT.priority;
-    HTMLElements.HTML_TASK_MODAL_INPUT_STATE.value = TaskManager.TASK_TO_EDIT.state;
-    HTMLElements.HTML_TASK_MODAL_INPUT_LIMIT_DATE.value = TaskManager.TASK_TO_EDIT.limitDate;
+    HTMLElements.HTML_TASK_MODAL_INPUT_TITLE.value = TaskManager.CURRENT_TASK_TO_EDIT.title;
+    HTMLElements.HTML_TASK_MODAL_INPUT_DESCRIPTION.value = TaskManager.CURRENT_TASK_TO_EDIT.description;
+    HTMLElements.HTML_TASK_MODAL_INPUT_ASSIGNED_TO.value = TaskManager.CURRENT_TASK_TO_EDIT.assignedTo;
+    HTMLElements.HTML_TASK_MODAL_INPUT_PRIORITY.value = TaskManager.CURRENT_TASK_TO_EDIT.priority;
+    HTMLElements.HTML_TASK_MODAL_INPUT_STATUS.value = TaskManager.CURRENT_TASK_TO_EDIT.status;
+    HTMLElements.HTML_TASK_MODAL_INPUT_END_DATE.value = TaskManager.CURRENT_TASK_TO_EDIT.endDate;
 }
 
 // -> Muestra la pantalla principal.
@@ -74,7 +74,7 @@ export function handleChangeMode() {
     }
 }
 
-// -> Mueve la tarjeta de una tarea dentro de un contenedor mediante drag - parte frontend.
+// -> Mueve la tarjeta de una tarea dentro de un contenedor mediante drag.
 export function handleDragTaskCardkOver(e, container) {
     e.preventDefault(); // Necesario para permitir el drop.
 
@@ -91,35 +91,45 @@ export function handleDragTaskCardkOver(e, container) {
     }
 }
 
-// -> Después de mover una tarjeta de tarea a un contenedor, cambia el estado de la tarea según el contenedor donde quedó la tarjeta - parte backend.
-export function handleDropTaskCard(e, container) {
+// -> Después de mover una tarjeta de tarea a un contenedor, cambia el estado de la tarea según el contenedor donde quedó la tarjeta.
+export async function handleDropTaskCard(e, container) {
     e.preventDefault(); // Evita la apertura de enlaces si hay algún drop inesperado.
 
     const draggingCard = document.querySelector(".dragging");
-    const taskCardId = parseInt(draggingCard.id.split("_")[1]);
+    const taskCardId = draggingCard.id.split("__")[1];
     const task = TaskManager.searchTaskById(taskCardId);
     const containerName = container.classList[1].split("--")[1];
+    TaskManager.changeTaskToEdit(task);
 
-    let newState;
+    let newStatus;
     switch (containerName) {
         case "backlog":
-            newState = "Backlog";
+            newStatus = "Backlog";
             break;
         case "to-do":
-            newState = "To Do";
+            newStatus = "To Do";
             break;
         case "in-progress":
-            newState = "In Progress";
+            newStatus = "In Progress";
             break;
         case "blocked":
-            newState = "Blocked"
+            newStatus = "Blocked"
             break;
         case "done":
-            newState = "Done";
+            newStatus = "Done";
     }
+    // Ya se movió al contenedor correcto en handleDragTaskCardOver(), así que su estado inicial es newStatus.
+    TaskManager.CURRENT_TASK_TO_EDIT_INITIAL_STATUS = newStatus;
 
-    task.state = newState;
-    TaskManager.moveTaskToEditToCorrectList();
+    await TaskManager.editTaskToEdit(
+        taskCardId,
+        task.title,
+        task.description,
+        task.assignedTo,
+        task.endDate,
+        newStatus,
+        task.priority
+    );
 }
 
 // -> Obtiene el elemento después del cual se soltará la tarjeta.
