@@ -130,7 +130,7 @@ export class Task {
 
         this.#HTMLEndDate.innerHTML = `
             <i class="fa-regular fa-calendar-days"></i>
-            Fin: ${this.#startDate}
+            Fin: ${this.#endDate}
         `;
 
         this.#HTMLPriority.innerHTML = `
