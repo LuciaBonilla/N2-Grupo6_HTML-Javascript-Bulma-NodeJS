@@ -1,137 +1,169 @@
 import * as HTMLElements from "./HTMLElements.js";
 import { Task } from "./Task.js";
+import { APIManager } from "./APIManager.js";
+import * as Handlers from "./eventHandlers.js";
 
 // *** Clase TaskManager ***
-// Función: Guarda las tareas y las administra; las crea, destruye y actualiza.
+// Responsabilidad: Guarda las tareas y las administra; las crea, destruye y actualiza.
+// Trabaja con BACKEND y FRONTEND.
+// Estereotipo de clase: Structurer.
 export class TaskManager {
     // -> Tarea actual que se está editando.
-    static #TASK_TO_EDIT;
+    static #CURRENT_TASK_TO_EDIT;
 
-    // -> Estado de la tarea actual que se está editando.
-    static #TASK_TO_EDIT_STATE;
+    // -> Estado inicial de la tarea actual que se está editando.
+    static #CURRENT_TASK_TO_EDIT_INITIAL_STATUS;
 
-    // -> Listas que guardan las tareas.
-    static #BACKLOG = [];
-    static #TO_DO = [];
-    static #IN_PROGRESS = [];
-    static #BLOCKED = [];
-    static #DONE = [];
+    // -> Listas que guardan las tareas a nivel de frontend.
+    static #TASKS = [];
 
-    // -> Getters.
-    static get TASK_TO_EDIT() {
-        return this.#TASK_TO_EDIT;
+    // -> Getters y setters.
+    static get CURRENT_TASK_TO_EDIT() {
+        return this.#CURRENT_TASK_TO_EDIT;
     }
 
-    static get BACKLOG() {
-        return this.#BACKLOG;
-    }
-
-    static get TO_DO() {
-        return this.#TO_DO;
-    }
-
-    static get IN_PROGRESS() {
-        return this.#IN_PROGRESS;
-    }
-
-    static get BLOCKED() {
-        return this.#BLOCKED;
-    }
-
-    static get DONE() {
-        return this.#DONE;
+    static set CURRENT_TASK_TO_EDIT_INITIAL_STATUS(newStatus) {
+        if (newStatus === "Backlog" || newStatus === "To Do" || newStatus === "In Progress" || newStatus === "Blocked" || newStatus === "Done") {
+            this.#CURRENT_TASK_TO_EDIT_INITIAL_STATUS = newStatus;
+        }
     }
 
     // -> Cambia la tarea a editar actual por otra.
     static changeTaskToEdit(task) {
-        this.#TASK_TO_EDIT = task;
-        this.#TASK_TO_EDIT_STATE = task.state;
+        this.#CURRENT_TASK_TO_EDIT = task;
+        this.#CURRENT_TASK_TO_EDIT_INITIAL_STATUS = task.status;
     }
 
-    // -> Añande la tarea a backend y a frontend.
-    static addNewTask(id, title, description, assigned, priority, limitDate, state) {
-        const newTask = new Task(id, title, description, assigned, priority, limitDate, state);
-        const newTaskState = newTask.state;
-        let container;
-        let list;
-
-        switch (newTaskState) {
-            case "Backlog":
-                container = HTMLElements.HTML_CONTAINER_BACKLOG;
-                list = this.#BACKLOG;
-                break;
-            case "To Do":
-                container = HTMLElements.HTML_CONTAINER_TO_DO;
-                list = this.#TO_DO;
-                break;
-            case "In Progress":
-                container = HTMLElements.HTML_CONTAINER_IN_PROGRESS;
-                list = this.#IN_PROGRESS;
-                break;
-            case "Blocked":
-                container = HTMLElements.HTML_CONTAINER_BLOCKED;
-                list = this.#BLOCKED;
-                break;
-            case "Done":
-                container = HTMLElements.HTML_CONTAINER_DONE;
-                list = this.#DONE;
-                break;
-        }
-        list.push(newTask);
-        container.appendChild(newTask.HTMLCard);
-    };
-
-    // -> Elimina la tarea a editar de backend y de frontend.
-    static deleteTaskToEdit() {
-        const taskToDeleteId = this.#TASK_TO_EDIT.id;
-        const taskToDeleteState = this.#TASK_TO_EDIT.state;
-        let container;
-        let list;
-
-        switch (taskToDeleteState) {
-            case "Backlog":
-                container = HTMLElements.HTML_CONTAINER_BACKLOG;
-                list = this.#BACKLOG;
-                break;
-            case "To Do":
-                container = HTMLElements.HTML_CONTAINER_TO_DO;
-                list = this.#TO_DO;
-                break;
-            case "In Progress":
-                container = HTMLElements.HTML_CONTAINER_IN_PROGRESS;
-                list = this.#IN_PROGRESS;
-                break;
-            case "Blocked":
-                container = HTMLElements.HTML_CONTAINER_BLOCKED;
-                list = this.#BLOCKED;
-                break;
-            case "Done":
-                container = HTMLElements.HTML_CONTAINER_DONE;
-                list = this.#DONE;
-                break;
-        }
-        container.removeChild(this.#TASK_TO_EDIT.HTMLCard);
-        list.forEach((task, index) => {
-            if (task.id === taskToDeleteId) {
-                list.splice(index, 1);
-                return;
+    // -> Añande una tarea a backend y a frontend.
+    static async addNewTask(title, description, assignedTo, endDate, status, priority) {
+        // Añade la tarea a backend y recibe un objeto JSON representándola. El JSON se parsea a un objeto plano.
+        const taskPlainObject = await APIManager.postNewTask(
+            {
+                title: `${title}`,
+                description: `${description}`,
+                assignedTo: `${assignedTo}`,
+                startDate: `${new Date().toLocaleDateString()}`,
+                endDate: `${endDate}`,
+                status: `${status}`,
+                priority: `${priority}`
             }
+        );
+
+        // Añade la tarea a frontend.
+        const newTask = new Task(
+            taskPlainObject.id,
+            taskPlainObject.title,
+            taskPlainObject.description,
+            taskPlainObject.assignedTo,
+            taskPlainObject.startDate,
+            taskPlainObject.endDate,
+            taskPlainObject.status,
+            taskPlainObject.priority
+        );
+        this.#TASKS.push(newTask);
+        this.#addEventListenersToTaskCard(newTask);
+
+        // Se establece la nueva tarea como la tarea a editar.
+        this.#CURRENT_TASK_TO_EDIT = newTask;
+        // No tiene estado inicial porque no está en ningún contenedor su tarjeta.
+        this.#CURRENT_TASK_TO_EDIT_INITIAL_STATUS = null;
+
+        // Mueve la tarjeta de tarea al contenedor correcto.
+        this.#moveTaskToEditToCorrectContainer();
+
+        // Se quita la tarea actual para editar.
+        this.#CURRENT_TASK_TO_EDIT = null;
+    }
+
+    // -> Añade los event listeners asociados a una tarjeta de tarea.
+    static #addEventListenersToTaskCard(task) {
+        const taskCard = task.HTMLCard;
+
+        // Evento para cuando se quiere editar la tarea.
+        taskCard.addEventListener("click", function () {
+            // Cambia la tarea a editar.
+            TaskManager.changeTaskToEdit(task);
+
+            // Muestra el modal para editar tarea.
+            Handlers.handleShowChangeTaskModal();
         });
-        this.#TASK_TO_EDIT = null;
-        this.#TASK_TO_EDIT_STATE = null;
+
+        // Evento para cuando se inicia el arrastre de la tarjeta.
+        taskCard.addEventListener("dragstart", function (event) {
+            // Establece los datos que se transferirán en el arrastre, en este caso, la tarjeta.
+            event.dataTransfer.setData("text/plain", event.target.id);
+
+            // Indica que se está draggeando.
+            taskCard.classList.add("dragging");
+        });
+
+        // Evento para cuando se termina el arrastre de la tarjeta.
+        taskCard.addEventListener("dragend", function () {
+            // Indica que no se está draggeando.
+            taskCard.classList.remove("dragging");
+        });
+    }
+
+    // -> Elimina la tarea actual que se está editando de backend y de frontend.
+    static async deleteTaskToEdit() {
+        const taskToDeleteId = this.#CURRENT_TASK_TO_EDIT.id;
+
+        // Elimina la tarea de backend.
+        const operationStatus = await APIManager.deleteTaskById(taskToDeleteId);
+
+        // Elimina la tarea de frontend.
+        const taskToDeleteStatus = this.#CURRENT_TASK_TO_EDIT.status;
+        let container;
+        switch (taskToDeleteStatus) {
+            case "Backlog":
+                container = HTMLElements.HTML_CONTAINER_BACKLOG;
+                break;
+            case "To Do":
+                container = HTMLElements.HTML_CONTAINER_TO_DO;
+                break;
+            case "In Progress":
+                container = HTMLElements.HTML_CONTAINER_IN_PROGRESS;
+                break;
+            case "Blocked":
+                container = HTMLElements.HTML_CONTAINER_BLOCKED;
+                break;
+            case "Done":
+                container = HTMLElements.HTML_CONTAINER_DONE;
+                break;
+        }
+        container.removeChild(this.#CURRENT_TASK_TO_EDIT.HTMLCard);
+        const index = this.#TASKS.findIndex(task => task.id === taskToDeleteId);
+        if (index !== -1) {
+            this.#TASKS.splice(index, 1);
+        }
+        this.#CURRENT_TASK_TO_EDIT = null;
+        this.#CURRENT_TASK_TO_EDIT_INITIAL_STATUS = null;
+
+        return operationStatus;
     };
 
-    // -> Edita todos los atributos de la tarea actual que se está editando; la cambia de lugar en backend y frontend si corresponde.
-    static editTaskToEdit(title, description, assigned, priority, limitDate, state) {
-        this.#TASK_TO_EDIT.updateTask(title, description, assigned, priority, limitDate, state);
-        this.moveTaskToEditToCorrectList();
+    // -> Edita los atributos de la tarea actual (menos la id y la fecha de inicio) que se está editando; la actualiza en backend y en frontend.
+    static async editTaskToEdit(id, title, description, assignedTo, endDate, status, priority) {
+        // Actualiza en backend.
+        const taskData = await APIManager.putTaskById(id,
+            {
+                title: `${title}`,
+                description: `${description}`,
+                assignedTo: `${assignedTo}`,
+                endDate: `${endDate}`,
+                status: `${status}`,
+                priority: `${priority}`
+            });
+
+        // Actualiza en frontend.
+        this.#CURRENT_TASK_TO_EDIT.updateTask(taskData.title, taskData.description, taskData.assignedTo, taskData.endDate, taskData.status, taskData.priority);
         this.#moveTaskToEditToCorrectContainer();
     };
 
-    // -> Mueve la tarjeta de la tarea al contenedor correcto - parte frontend.
+    // -> Mueve la tarjeta de la tarea actual a editar al contenedor correcto en frontend.
     static #moveTaskToEditToCorrectContainer() {
-        const taskToMoveOldState = this.#TASK_TO_EDIT_STATE;
-        const taskToMoveActualState = this.#TASK_TO_EDIT.state;
+        const taskToMoveOldState = this.#CURRENT_TASK_TO_EDIT_INITIAL_STATUS;
+        const taskToMoveActualState = this.#CURRENT_TASK_TO_EDIT.status;
 
         if (taskToMoveOldState !== taskToMoveActualState) {
             let oldContainer;
@@ -171,73 +203,48 @@ export class TaskManager {
                     newContainer = HTMLElements.HTML_CONTAINER_DONE;
                     break;
             }
-            oldContainer.removeChild(this.#TASK_TO_EDIT.HTMLCard);
-            newContainer.appendChild(this.#TASK_TO_EDIT.HTMLCard);
+
+            if (oldContainer !== undefined) {
+                oldContainer.removeChild(this.#CURRENT_TASK_TO_EDIT.HTMLCard);
+            }
+            newContainer.appendChild(this.#CURRENT_TASK_TO_EDIT.HTMLCard);
         }
     }
 
-    // -> Mueve la tarea a la lista correcta - parte backend.
-    static moveTaskToEditToCorrectList() {
-        const taskToMoveId = this.#TASK_TO_EDIT.id;
-        const taskToMoveOldState = this.#TASK_TO_EDIT_STATE;
-        const taskToMoveActualState = this.#TASK_TO_EDIT.state;
-
-        if (taskToMoveOldState !== taskToMoveActualState) {
-            let oldList;
-            switch (taskToMoveOldState) {
-                case "Backlog":
-                    oldList = this.#BACKLOG;
-                    break;
-                case "To Do":
-                    oldList = this.#TO_DO;
-                    break;
-                case "In Progress":
-                    oldList = this.#IN_PROGRESS;
-                    break;
-                case "Blocked":
-                    oldList = this.#BLOCKED;
-                    break;
-                case "Done":
-                    oldList = this.#DONE;
-                    break;
-            }
-
-            let newList;
-            switch (taskToMoveActualState) {
-                case "Backlog":
-                    newList = this.#BACKLOG;
-                    break;
-                case "To Do":
-                    newList = this.#TO_DO;
-                    break;
-                case "In Progress":
-                    newList = this.#IN_PROGRESS;
-                    break;
-                case "Blocked":
-                    newList = this.#BLOCKED;
-                    break;
-                case "Done":
-                    newList = this.#DONE;
-                    break;
-            }
-
-            oldList.forEach((task, index) => {
-                if (task.id === taskToMoveId) {
-                    oldList.splice(index, 1);
-                    return;
-                }
-            });
-            newList.push(this.#TASK_TO_EDIT);
-        }
-    }
-
-    // -> Retorna una tarea por la id.
+    // -> Retorna una tarea de frontend por la id.
     static searchTaskById(taskToSearchId) {
-        // Buscar en cada lista y retornar la primera coincidencia encontrada
-        return this.#BACKLOG.find(task => task.id === taskToSearchId) ||
-            this.#TO_DO.find(task => task.id === taskToSearchId) ||
-            this.#IN_PROGRESS.find(task => task.id === taskToSearchId) ||
-            this.#BLOCKED.find(task => task.id === taskToSearchId) ||
-            this.#DONE.find(task => task.id === taskToSearchId);
+        return this.#TASKS.find(task => task.id === taskToSearchId);
+    }
+
+    // -> Trae las tareas de backend a frontend.
+    static async loadTasksFromDatabase() {
+        const tasks = await APIManager.getAllTasks();
+
+        tasks.forEach((taskData) => {
+            const loadedTask = new Task(
+                taskData.id,
+                taskData.title,
+                taskData.description,
+                taskData.assignedTo,
+                taskData.startDate,
+                taskData.endDate,
+                taskData.status,
+                taskData.priority
+            );
+            this.#TASKS.push(loadedTask);
+            this.#addEventListenersToTaskCard(loadedTask);
+
+            // Se establece la nueva tarea como la tarea a editar.
+            this.#CURRENT_TASK_TO_EDIT = loadedTask;
+
+            // No tiene estado inicial porque no está en ningún contenedor su tarjeta.
+            this.#CURRENT_TASK_TO_EDIT_INITIAL_STATUS = null;
+
+            // Mueve la tarjeta de tarea al contenedor correcto.
+            this.#moveTaskToEditToCorrectContainer();
+
+            // Se quita la tarea actual para editar.
+            this.#CURRENT_TASK_TO_EDIT = null;
+        });
     }
 }
