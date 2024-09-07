@@ -42,7 +42,7 @@ export class TaskManager {
                 title: `${title}`,
                 description: `${description}`,
                 assignedTo: `${assignedTo}`,
-                startDate: `${new Date().toLocaleDateString()}`,
+                startDate: `${new Date().toLocaleDateString('en-CA')}`,
                 endDate: `${endDate}`,
                 status: `${status}`,
                 priority: `${priority}`
