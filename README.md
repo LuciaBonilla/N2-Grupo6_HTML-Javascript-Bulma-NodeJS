@@ -37,4 +37,4 @@
 - Los estilos se ajustan para Mobile, Tablet y Desktop. :white_check_mark:
 - La web cuenta con la posibilidad de cambiar entre modo Dark y Light :white_check_mark:
 - Se puede cambiar el estado de las tareas arrastrándolas entre las columnas (drag and drop). :white_check_mark:
-- Interactúa con el backend para obtener tareas, subir tareas, editar tarea y eliminar tarea.
+- Interactúa con el backend para obtener tareas, subir tareas, editar tareas y eliminar tareas.
