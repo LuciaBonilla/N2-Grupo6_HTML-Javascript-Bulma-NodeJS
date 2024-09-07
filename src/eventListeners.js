@@ -1,13 +1,13 @@
 import * as HTMLElements from "./HTMLElements.js";
 import * as Handlers from "./eventHandlers.js";
 import { TaskManager } from "./TaskManager.js";
-import { LocalStorageManager } from "./LocalStorageManager.js";
 
 export function addEventListeners() {
     // *** PÁGINA PRINCIPAL
 
     // -> Botón AGREGAR TAREA en la página principal.
     HTMLElements.HTML_BUTTON_ADD_TASK.addEventListener("click", function () {
+        Handlers.handleCleanInputs();
         Handlers.handleShowAddTaskModal();
     });
 
@@ -61,18 +61,17 @@ export function addEventListeners() {
     // *** MODAL AGREGAR TAREA
 
     // -> Botón ACEPTAR en modo Agregar tarea.
-    HTMLElements.HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event) {
+    HTMLElements.HTML_ADD_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", async function (event) {
         // Para evitar el submit.
         event.preventDefault();
 
-        TaskManager.addNewTask(
-            -1,
+        await TaskManager.addNewTask(
             HTMLElements.HTML_TASK_MODAL_INPUT_TITLE.value,
             HTMLElements.HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_ASSIGNED.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_PRIORITY.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_LIMIT_DATE.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_STATE.value
+            HTMLElements.HTML_TASK_MODAL_INPUT_ASSIGNED_TO.value,
+            HTMLElements.HTML_TASK_MODAL_INPUT_END_DATE.value,
+            HTMLElements.HTML_TASK_MODAL_INPUT_STATUS.value,
+            HTMLElements.HTML_TASK_MODAL_INPUT_PRIORITY.value
         );
         Handlers.handleShowPrincipalPage();
         Handlers.handleCleanInputs();
@@ -90,17 +89,18 @@ export function addEventListeners() {
     // *** MODAL EDITAR TAREA
 
     // -> Botón ACEPTAR en modo Editar tarea.
-    HTMLElements.HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", function (event) {
+    HTMLElements.HTML_CHANGE_TASK_MODAL_BUTTON_ACCEPT_TASK.addEventListener("click", async function (event) {
         // Para evitar el submit.
         event.preventDefault();
 
-        TaskManager.editTaskToEdit(
+        await TaskManager.editTaskToEdit(
+            TaskManager.CURRENT_TASK_TO_EDIT.id,
             HTMLElements.HTML_TASK_MODAL_INPUT_TITLE.value,
             HTMLElements.HTML_TASK_MODAL_INPUT_DESCRIPTION.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_ASSIGNED.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_PRIORITY.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_LIMIT_DATE.value,
-            HTMLElements.HTML_TASK_MODAL_INPUT_STATE.value
+            HTMLElements.HTML_TASK_MODAL_INPUT_ASSIGNED_TO.value,
+            HTMLElements.HTML_TASK_MODAL_INPUT_END_DATE.value,
+            HTMLElements.HTML_TASK_MODAL_INPUT_STATUS.value,
+            HTMLElements.HTML_TASK_MODAL_INPUT_PRIORITY.value
         );
         Handlers.handleShowPrincipalPage();
         Handlers.handleCleanInputs();
@@ -116,26 +116,22 @@ export function addEventListeners() {
     });
 
     // -> Botón ELIMINAR en modo Editar tarea.
-    HTMLElements.HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK.addEventListener("click", function (event) {
+    HTMLElements.HTML_CHANGE_TASK_MODAL_BUTTON_DELETE_TASK.addEventListener("click", async function (event) {
         // Para evitar el submit.
         event.preventDefault();
 
-        TaskManager.deleteTaskToEdit();
+        const operationStatus = await TaskManager.deleteTaskToEdit();
         Handlers.handleShowPrincipalPage();
         Handlers.handleCleanInputs();
+        if (!operationStatus.success) {
+            alert("No se ha podido eliminar la tarea!!!");
+        }
     });
 
-    // *** LOCAL STORAGE
+    // *** CARGA LAS TAREAS DEL BACKEND EN EL FRONTEND
 
     // Para cargar.
     window.addEventListener("DOMContentLoaded", function () {
-        LocalStorageManager.loadIdOfTaskClassFromStorage();
-        LocalStorageManager.loadTaskListsFromStorage();
-    });
-
-    // Para guardar.
-    window.addEventListener("beforeunload", function (event) {
-        LocalStorageManager.saveIdOfTaskClassToStorage();
-        LocalStorageManager.saveTaskListsToStorage();
+        TaskManager.loadTasksFromDatabase();
     });
 }

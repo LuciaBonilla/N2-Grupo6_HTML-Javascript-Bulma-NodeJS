@@ -33,10 +33,10 @@ export const HTML_TASK_MODAL_CHANGE_TASK_TITLE = document.getElementsByClassName
 //      -> Inputs del modal.
 export const HTML_TASK_MODAL_INPUT_TITLE = document.getElementById("title");
 export const HTML_TASK_MODAL_INPUT_DESCRIPTION = document.getElementById("description");
-export const HTML_TASK_MODAL_INPUT_ASSIGNED = document.getElementById("assigned");
+export const HTML_TASK_MODAL_INPUT_ASSIGNED_TO = document.getElementById("assigned-to");
 export const HTML_TASK_MODAL_INPUT_PRIORITY = document.getElementById("priority");
-export const HTML_TASK_MODAL_INPUT_STATE = document.getElementById("state");
-export const HTML_TASK_MODAL_INPUT_LIMIT_DATE = document.getElementById("limit-date");
+export const HTML_TASK_MODAL_INPUT_STATUS = document.getElementById("status");
+export const HTML_TASK_MODAL_INPUT_END_DATE = document.getElementById("end-date");
 
 //      -> Botones del modal.
 
